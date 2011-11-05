@@ -16,7 +16,7 @@ var NodeBot = function( config ) {
     self.init = function() {
 
         self.Net.connect();
-    }
+    };
 
     /**
      * Instantiates a Module.
@@ -26,7 +26,7 @@ var NodeBot = function( config ) {
 
         var modName = Module.toLowerCase();
         self.modules[modName]           = require( './modules/' + Module + '.js' );
-    }
+    };
 
     /**
      * @include Libraries
