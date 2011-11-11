@@ -15,7 +15,32 @@ var NodeBot = function( config ) {
 
     self.init = function() {
 
+        self.setupLibraries();
+        self.setupModules();
+
+        self.log( 'Initialized with %d modules.', [self.modules.length] );
+        self.log( self.modules );
         self.Net.connect();
+    };
+
+    self.log = function( message, values ) {
+
+        var args                        = [];
+
+        if (typeof message !== 'object') {
+            args.push( '[%d] ' + message + '\n' );
+            args.push( (new Date).getTime() );
+        } else {
+            args.push( '[%d] %j\n' );
+            args.push( (new Date).getTime() );
+            args.push( message );
+        }
+
+        if ( typeof values !== 'undefined' ) {
+            args                    = args.concat( values );
+        }
+
+        console.log.apply( console, args );
     };
 
     /**
@@ -29,18 +54,22 @@ var NodeBot = function( config ) {
     };
 
     /**
-     * @include Libraries
-     */
-    self.Log                            = require( './lib/Log.js' );
-    self.Net                            = require( './lib/Net.js' );
+     * Runs through the list of core libraries and installs them.
+     **/
+    self.setupLibraries = function() {
+        self.Net                            = require( './lib/Net.js' );
+        self.Util                           = require( 'util' );
+    }
 
     /**
-     * @include Modules
-     */
-    self.loadModule( 'Finger' );
-    
+     * Runs through the list of modules and installs them.
+     **/
+    self.setupModules = function() {
+        self.loadModule( 'Finger' );
+    }
+
+    process.NodeBot         = self;
     self.init();
     return self;
-};
-
-process.NodeBot             = new NodeBot( config );
+}
+new NodeBot( config );
