@@ -1,7 +1,7 @@
 var config = {
     mud : {
-        host                : 'localhost',  // The hostname of your MUSH; best if localhost
-        port                : 2067,         // The port of your MUSH
+        host                : 'writh.net',  // The hostname of your MUSH; best if localhost
+        port                : 2016,         // The port of your MUSH
         user                : 'NodeBot',    // The username of your bot.
         pass                : '!'           // The password of your bot.
     }
@@ -11,9 +11,24 @@ var config = {
 var NodeBot = function( config ) {
     var self                = this;
     self.config             = config;
-    self.modules            = {};
+    libraries               = [];
+    modules                 = {};
 
     self.init = function() {
+
+        for ( var i in libraries ) {
+            var library = self[libraries[i]];
+
+            if ( typeof library.init === 'function' ) {
+                library.init( self );
+            }
+        }
+
+        for ( var i in modules ) {
+            if ( typeof modules[i].init === 'function' ) {
+                modules[i].init( self );
+            }
+        }
 
         self.Connection.connect();
     };
@@ -24,8 +39,8 @@ var NodeBot = function( config ) {
      */
     self.loadLibrary = function( Library ) {
 
+        libraries.push( Library );
         self[Library]                   = require( './lib/' + Library );
-        self[Library].init( self );
     };
 
     /**
@@ -34,20 +49,18 @@ var NodeBot = function( config ) {
      */
     self.loadModule = function( Module ) {
 
-        var modName = Module.toLowerCase();
-        self.modules[modName]           = require( './modules/' + Module + '.js' );
-
-        if ( typeof self.modules[modName].init === 'function' ) {
-            self.modules[modName].init( self );
-        }
+        var modName                     = Module.toLowerCase();
+        modules[modName]                = require( './modules/' + Module + '.js' );
     };
 
     /**
      * @include Libraries
      */
-    self.loadLibrary( 'Log' );
     self.loadLibrary( 'Controller' );
     self.loadLibrary( 'Connection' );
+    self.loadLibrary( 'Log' );
+    self.loadLibrary( 'Process' );
+    self.loadLibrary( 'ProcessManager' );
 
     /**
      * @include Modules
