@@ -1,21 +1,31 @@
 var config = {
     mud : {
-        host                : 'localhost',  // The hostname of your MUSH; best if localhost
-        port                : 2167,         // The port of your MUSH
+        host                : 'writh.net',  // The hostname of your MUSH; best if localhost
+        port                : 2016,         // The port of your MUSH
         user                : 'NodeBot',    // The username of your bot.
         pass                : '!'           // The password of your bot.
     }
 };
 
+
 var NodeBot = function( config ) {
     var self                = this;
-    var NB                  = self;
-    self.modules            = {};
     self.config             = config;
+    self.modules            = {};
 
     self.init = function() {
 
-        self.Net.connect();
+        self.Connection.connect();
+    };
+
+    /**
+     * Instantiates a Library.
+     * @param Library
+     */
+    self.loadLibrary = function( Library ) {
+
+        self[Library]                   = require( './lib/' + Library );
+        self[Library].init( self );
     };
 
     /**
@@ -26,13 +36,18 @@ var NodeBot = function( config ) {
 
         var modName = Module.toLowerCase();
         self.modules[modName]           = require( './modules/' + Module + '.js' );
+
+        if ( typeof self.modules[modName].init === 'function' ) {
+            self.modules[modName].init( self );
+        }
     };
 
     /**
      * @include Libraries
      */
-    self.Log                            = require( './lib/Log.js' );
-    self.Net                            = require( './lib/Net.js' );
+    self.loadLibrary( 'Log' );
+    self.loadLibrary( 'Controller' );
+    self.loadLibrary( 'Connection' );
 
     /**
      * @include Modules
@@ -43,4 +58,4 @@ var NodeBot = function( config ) {
     return self;
 };
 
-process.NodeBot             = new NodeBot( config );
+module.exports              = new NodeBot( config );
