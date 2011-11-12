@@ -28,6 +28,26 @@ var NodeBot = function( config ) {
         self[Library].init( self );
     };
 
+    self.log = function( message, values ) {
+
+        var args                        = [];
+
+        if (typeof message !== 'object') {
+            args.push( '[%d] ' + message + '\n' );
+            args.push( (new Date).getTime() );
+        } else {
+            args.push( '[%d] %j\n' );
+            args.push( (new Date).getTime() );
+            args.push( message );
+        }
+
+        if ( typeof values !== 'undefined' ) {
+            args                    = args.concat( values );
+        }
+
+        console.log.apply( console, args );
+    };
+
     /**
      * Instantiates a Module.
      * @param Module
@@ -53,9 +73,7 @@ var NodeBot = function( config ) {
      * @include Modules
      */
     self.loadModule( 'Finger' );
-    
-    self.init();
-    return self;
+
 };
 
 module.exports              = new NodeBot( config );
