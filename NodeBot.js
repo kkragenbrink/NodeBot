@@ -1,73 +1,139 @@
+/**
+ * NodeBot
+ *
+ * @author  Kevin "Loki" Kragenbrink <kevin@writh.net>
+ * @updated 12 November 2011
+ * @version 0.4.0
+ */
+
+// Update this configuration section with your information.
 var config = {
+    // The list of plugins you want to use.
+    plugins                 : ['Finger'],
+
+    // Output decorators.
+    output : {
+        header              : '[center( < %s >, 78, = )]\n',
+        prefix              : '<%s>',
+        tail                : '[repeat( =, 78 )]'
+    },
+
+    // Connection information.
     mud : {
         host                : 'writh.net',  // The hostname of your MUSH; best if localhost
         port                : 2016,         // The port of your MUSH
         user                : 'NodeBot',    // The username of your bot.
         pass                : '!'           // The password of your bot.
-    }
+    },
+
+    // The level of details you want to see in your logs. (debug, log, warn, or error)
+    logLevel                : 'debug'
 };
+// *** STOP ***
+// Do not edit below this line.
+// *** STOP ***
 
-
+/**
+ * NodeBot Bootstrap Script
+ *
+ * Bootstraps the NodeBot and initializes its plugins for run.
+ * @param object config
+ */
 var NodeBot = function( config ) {
     var self                = this;
+    var libraries = {
+        Controller          : false,
+        Connection          : false,
+        Log                 : false,
+        Process             : false,
+        ProcessManager      : false
+    };
+    var plugins             = {};
+    var version             = '0.4.0';
     self.config             = config;
-    libraries               = [];
-    modules                 = {};
+    self.prelog             = []
 
-    self.init = function() {
-
-        for ( var i in libraries ) {
-            var library = self[libraries[i]];
-
-            if ( typeof library.init === 'function' ) {
-                library.init( self );
-            }
+    /**
+     * Creates a log store until the Log class is initialized.
+     * @param string type
+     */
+    function Prelog( type ) {
+        return function() {
+            var args = Array.prototype.slice.call( arguments, 0 );
+            args.unshift( type );
+            self.prelog.push( args );
         }
+    }
+    self.debug = new Prelog( 'debug' );
+    self.error = new Prelog( 'error' );
+    self.log = new Prelog( 'log' );
+    self.warn = new Prelog( 'warn' );
 
-        for ( var i in modules ) {
-            if ( typeof modules[i].init === 'function' ) {
-                modules[i].init( self );
-            }
-        }
+    /**
+     * Initializes NodeBot and instantiates all libraries and plugins.
+     * @private
+     */
+    function init() {
 
+        self.log( 'NodeBot', "NodeBot %s starting up.", version );
+        loadLibraries();
+        loadPlugins();
         self.Connection.connect();
-    };
+    }
 
     /**
-     * Instantiates a Library.
-     * @param Library
+     * Iterates through the libraries and initializes them.
+     * @private
      */
-    self.loadLibrary = function( Library ) {
-
-        libraries.push( Library );
-        self[Library]                   = require( './lib/' + Library );
-    };
+    function loadLibraries() {
+        for ( var i in libraries ) {
+            loadLibrary( i );
+        }
+        
+    }
 
     /**
-     * Instantiates a Module.
-     * @param Module
+     * Iterates through the requested plugins and initializes them.
+     * @private
      */
-    self.loadModule = function( Module ) {
-
-        var modName                     = Module.toLowerCase();
-        modules[modName]                = require( './modules/' + Module + '.js' );
-    };
-
-    /**
-     * @include Libraries
-     */
-    self.loadLibrary( 'Controller' );
-    self.loadLibrary( 'Connection' );
-    self.loadLibrary( 'Log' );
-    self.loadLibrary( 'Process' );
-    self.loadLibrary( 'ProcessManager' );
+    function loadPlugins() {
+        for ( var i in self.config.plugins ) {
+            loadPlugin( self.config.plugins[i] );
+        }
+    }
 
     /**
-     * @include Modules
+     * Registers a Library.
+     * @param string Library
+     * @private
      */
-    self.loadModule( 'Finger' );
-    
-    self.init();
+    function loadLibrary( Library ) {
+
+        if ( !libraries[Library] ) {
+            self[Library]                   = require( './lib/' + Library );
+
+            if ( typeof self[Library].init === 'function' ) {
+                self[Library].init( self );
+            }
+
+            libraries[Library]              = true;
+        }
+    }
+
+    /**
+     * Registers a Plugin.
+     * @param string Plugin
+     * @private
+     */
+    function loadPlugin( Plugin ) {
+
+        var pluginName                  = Plugin.toLowerCase();
+        plugins[pluginName]             = require( './plugins/' + Plugin + '.js' );
+        plugins[pluginName].init( self );
+    }
+
+    // Go!
+    init();
     return self;
 };
 
