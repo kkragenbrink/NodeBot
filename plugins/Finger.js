@@ -1,6 +1,7 @@
 var Finger = function() {
     var self                                = this;
     var NodeBot                             = {};
+    var callbacks                           = {};
     var util                                = require( 'util' );
 
     self.init = function( NB ) {
@@ -19,20 +20,29 @@ var Finger = function() {
             values                          : {}
         };
 
-        var proc                            = NodeBot.ProcessManager.createProcess( data, complete );
-        var pmatch                          = proc.spawn( {}, matchName );
+        var proc                            = NodeBot.ProcessManager.createProcess( data, callbacks.finger );
+        var pmatch                          = proc.spawn( {}, callbacks.pmatch );
 
         NodeBot.Connection.pmatch( pmatch.pid, data.target );
     };
 
-    var complete = function() {
-        for ( var i in this.data.values ) {
-            this.data.message               = this.data.message.replace( '%' + i + '%', this.data.values[i] );
+    callbacks.finger = function() {
+        if ( this.data.matchedTarget ) {
+
+            for ( var i in this.data.values ) {
+                this.data.message               = this.data.message.replace( '%' + i + '%', this.data.values[i] );
+            }
+            NodeBot.Connection.pemit( this.data.requester, this.data.message );
         }
-        NodeBot.Connection.pemit( this.data.requester, this.data.message );
     };
 
-    var matchName = function( target ) {
+    callbacks.getVar = function( val ) {
+        val                                 = val.replace( '\n', '' );
+
+        this.parent.data.values[this.data.key] = val;
+    };
+
+    callbacks.pmatch = function( target ) {
         target                              = target.replace( '\n', '' );
 
         // Valid target?
@@ -45,7 +55,7 @@ var Finger = function() {
             this.parent.data.message        = util.format( NodeBot.config.output.header, 'Finger for %name%' );
             this.parent.data.message       += NodeBot.config.output.tail;
 
-            var name                        = this.parent.spawn( { key : 'name' }, getVar );
+            var name                        = this.parent.spawn( { key : 'name' }, callbacks.getVar );
             NodeBot.Connection.name( name.pid, this.parent.data.matchedTarget );
         }
         // Not a player
@@ -54,12 +64,6 @@ var Finger = function() {
             NodeBot.Connection.pemit( this.parent.data.requester, NodeBot.config.output.prefix + " %s is not a valid character.", '+finger', this.parent.data.target );
         }
     };
-
-    var getVar = function( val ) {
-        val                                 = val.replace( '\n', '' );
-
-        this.parent.data.values[this.data.key] = val;
-    }
 };
 
 module.exports                              = new Finger();
