@@ -45,13 +45,14 @@ var NodeBot = function( config ) {
         Controller          : false,
         Connection          : false,
         Log                 : false,
+        Mud                 : false,
         Process             : false,
         ProcessManager      : false
     };
     var plugins             = {};
     var version             = '0.4.0';
     self.config             = config;
-    self.prelog             = []
+    self.prelog             = [];
 
     /**
      * Creates a log store until the Log class is initialized.
