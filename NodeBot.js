@@ -1,7 +1,7 @@
 var config = {
     mud : {
         host                : 'writh.net',  // The hostname of your MUSH; best if localhost
-        port                : 2067,         // The port of your MUSH
+        port                : 2016,         // The port of your MUSH
         user                : 'NodeBot',    // The username of your bot.
         pass                : '!'           // The password of your bot.
     }
@@ -26,26 +26,6 @@ var NodeBot = function( config ) {
 
         self[Library]                   = require( './lib/' + Library );
         self[Library].init( self );
-    };
-
-    self.log = function( message, values ) {
-
-        var args                        = [];
-
-        if (typeof message !== 'object') {
-            args.push( '[%d] ' + message + '\n' );
-            args.push( (new Date).getTime() );
-        } else {
-            args.push( '[%d] %j\n' );
-            args.push( (new Date).getTime() );
-            args.push( message );
-        }
-
-        if ( typeof values !== 'undefined' ) {
-            args                    = args.concat( values );
-        }
-
-        console.log.apply( console, args );
     };
 
     /**
@@ -73,7 +53,9 @@ var NodeBot = function( config ) {
      * @include Modules
      */
     self.loadModule( 'Finger' );
-
+    
+    self.init();
+    return self;
 };
 
 module.exports              = new NodeBot( config );
