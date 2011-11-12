@@ -1,7 +1,7 @@
 var config = {
     mud : {
         host                : 'writh.net',  // The hostname of your MUSH; best if localhost
-        port                : 2016,         // The port of your MUSH
+        port                : 2067,         // The port of your MUSH
         user                : 'NodeBot',    // The username of your bot.
         pass                : '!'           // The password of your bot.
     }
