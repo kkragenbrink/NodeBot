@@ -37,7 +37,7 @@ var config = {
  * NodeBot Bootstrap Script
  *
  * Bootstraps the NodeBot and initializes its plugins for run.
- * @param object config
+ * @param config
  */
 var NodeBot = function( config ) {
     var self                = this;
@@ -56,7 +56,7 @@ var NodeBot = function( config ) {
 
     /**
      * Creates a log store until the Log class is initialized.
-     * @param string type
+     * @param type
      */
     function Prelog( type ) {
         return function() {
@@ -105,7 +105,7 @@ var NodeBot = function( config ) {
 
     /**
      * Registers a Library.
-     * @param string Library
+     * @param Library
      * @private
      */
     function loadLibrary( Library ) {
@@ -123,7 +123,7 @@ var NodeBot = function( config ) {
 
     /**
      * Registers a Plugin.
-     * @param string Plugin
+     * @param Plugin
      * @private
      */
     function loadPlugin( Plugin ) {
