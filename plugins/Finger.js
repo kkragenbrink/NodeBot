@@ -57,6 +57,9 @@ var Finger = function() {
 
             var name                        = this.parent.spawn( { key : 'name' }, callbacks.getVar );
             NodeBot.Mud.name( name.pid, this.parent.data.matchedTarget );
+
+            var alias                       = this.parent.spawn( { key : 'alias' }, callbacks.getVar );
+            NodeBot.Mud.alias( alias.pid, this.parent.data.matchedTarget );
         }
         // Not a player
         else {
