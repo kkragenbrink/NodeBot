@@ -13,9 +13,10 @@ var config = {
 
     // Output decorators.
     output : {
-        header              : '[center( < %s >, 78, = )]\n',
-        prefix              : '<%s>',
-        tail                : '[repeat( =, 78 )]'
+        header              : '[center(< %s >, 78, =)]',
+        mid                 : '[repeat(-, 78)]',
+        prefix              : '\\[%s\\]',
+        tail                : '[repeat(=, 78)]'
     },
 
     // Connection information.
@@ -26,8 +27,8 @@ var config = {
         pass                : '!'           // The password of your bot.
     },
 
-    // The level of details you want to see in your logs. (debug, log, warn, or error)
-    logLevel                : 'debug'
+    // The level of details you want to see in your logs. (audit, trace, debug, log, warn, or error)
+    logLevel                : 'log'
 };
 // *** STOP ***
 // Do not edit below this line.
@@ -50,7 +51,7 @@ var NodeBot = function( config ) {
         ProcessManager      : false
     };
     var plugins             = {};
-    var version             = '0.5.0';
+    var version             = '0.6.0';
     self.config             = config;
     self.prelog             = [];
 
