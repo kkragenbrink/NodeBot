@@ -50,7 +50,7 @@ var NodeBot = function( config ) {
         ProcessManager      : false
     };
     var plugins             = {};
-    var version             = '0.4.0';
+    var version             = '0.5.0';
     self.config             = config;
     self.prelog             = [];
 
