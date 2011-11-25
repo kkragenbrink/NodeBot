@@ -23,7 +23,7 @@ var Finger = function() {
         var proc                            = NodeBot.ProcessManager.createProcess( data, callbacks.finger );
         var pmatch                          = proc.spawn( {}, callbacks.pmatch );
 
-        NodeBot.Connection.pmatch( pmatch.pid, data.target );
+        NodeBot.Mud.pmatch( pmatch.pid, data.target );
     };
 
     callbacks.finger = function() {
@@ -32,7 +32,7 @@ var Finger = function() {
             for ( var i in this.data.values ) {
                 this.data.message               = this.data.message.replace( '%' + i + '%', this.data.values[i] );
             }
-            NodeBot.Connection.pemit( this.data.requester, this.data.message );
+            NodeBot.Mud.pemit( this.data.requester, this.data.message );
         }
     };
 
@@ -56,12 +56,15 @@ var Finger = function() {
             this.parent.data.message       += NodeBot.config.output.tail;
 
             var name                        = this.parent.spawn( { key : 'name' }, callbacks.getVar );
-            NodeBot.Connection.name( name.pid, this.parent.data.matchedTarget );
+            NodeBot.Mud.name( name.pid, this.parent.data.matchedTarget );
+
+            var alias                       = this.parent.spawn( { key : 'alias' }, callbacks.getVar );
+            NodeBot.Mud.alias( alias.pid, this.parent.data.matchedTarget );
         }
         // Not a player
         else {
             NodeBot.log( 'Finger', "matchName returned an invalid target." );
-            NodeBot.Connection.pemit( this.parent.data.requester, NodeBot.config.output.prefix + " %s is not a valid character.", '+finger', this.parent.data.target );
+            NodeBot.Mud.pemit( this.parent.data.requester, NodeBot.config.output.prefix + " %s is not a valid character.", '+finger', this.parent.data.target );
         }
     };
 };

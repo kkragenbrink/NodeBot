@@ -20,8 +20,8 @@ var config = {
 
     // Connection information.
     mud : {
-        host                : 'writh.net',  // The hostname of your MUSH; best if localhost
-        port                : 2016,         // The port of your MUSH
+        host                : 'localhost',  // The hostname of your MUSH; best if localhost
+        port                : 2067,         // The port of your MUSH
         user                : 'NodeBot',    // The username of your bot.
         pass                : '!'           // The password of your bot.
     },
@@ -37,7 +37,7 @@ var config = {
  * NodeBot Bootstrap Script
  *
  * Bootstraps the NodeBot and initializes its plugins for run.
- * @param object config
+ * @param config
  */
 var NodeBot = function( config ) {
     var self                = this;
@@ -45,17 +45,18 @@ var NodeBot = function( config ) {
         Controller          : false,
         Connection          : false,
         Log                 : false,
+        Mud                 : false,
         Process             : false,
         ProcessManager      : false
     };
     var plugins             = {};
     var version             = '0.4.0';
     self.config             = config;
-    self.prelog             = []
+    self.prelog             = [];
 
     /**
      * Creates a log store until the Log class is initialized.
-     * @param string type
+     * @param type
      */
     function Prelog( type ) {
         return function() {
@@ -104,7 +105,7 @@ var NodeBot = function( config ) {
 
     /**
      * Registers a Library.
-     * @param string Library
+     * @param Library
      * @private
      */
     function loadLibrary( Library ) {
@@ -122,7 +123,7 @@ var NodeBot = function( config ) {
 
     /**
      * Registers a Plugin.
-     * @param string Plugin
+     * @param Plugin
      * @private
      */
     function loadPlugin( Plugin ) {
