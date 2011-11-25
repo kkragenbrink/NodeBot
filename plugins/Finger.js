@@ -2,71 +2,171 @@ var Finger = function() {
     var self                                = this;
     var NodeBot                             = {};
     var callbacks                           = {};
-    var util                                = require( 'util' );
+    callbacks.finger                        = {};
+    var util                                = require('util');
 
     self.init = function( NB ) {
 
         NodeBot                             = NB;
-        NodeBot.Controller.registerCommand( 'finger', self.finger );
+        NodeBot.Controller.registerCommand('finger', self.finger);
+        NodeBot.Mud.setup.push( '@switch hasattr(%!,ACONNECT)=1,{@edit me/ACONNECT=^,&LAST_CONNECT %%#=[secs()];},{@ACONNECT me=&LAST_CONNECT %%#=[secs()];}' );
+        NodeBot.Mud.setup.push( '@switch hasattr(%!,ADISCONNECT)=1,{@edit me/ADISCONNECTA=^,&LAST_DISCONNECT %%#=[secs()];},{@ADISCONNECT me=&LAST_DISCONNECT %%#=[secs()];}' );
     };
 
-    self.finger = function( requester, switches, args ) {
+    self.finger = function(requester, switches, args) {
 
-        NodeBot.log( 'Finger', "Handling request for %s.", requester );
-
+        NodeBot.debug('Finger', "Handling request for %s.", requester);
         var data = {
             requester                       : requester,
             target                          : args,
-            values                          : {}
+            values                          : {},
+            message                         : new Array()
         };
 
-        var proc                            = NodeBot.ProcessManager.createProcess( data, callbacks.finger );
-        var pmatch                          = proc.spawn( {}, callbacks.pmatch );
+        var proc                            = NodeBot.ProcessManager.createProcess(data, callbacks.finger.complete);
+        var matchTarget                     = proc.spawn({}, callbacks.finger.matchTarget);
 
-        NodeBot.Mud.pmatch( pmatch.pid, data.target );
+        NodeBot.Mud.pmatch(matchTarget.pid, data.target);
     };
 
-    callbacks.finger = function() {
-        if ( this.data.matchedTarget ) {
+    /**
+     * Called when +finger is completed.
+     */
+    callbacks.finger.complete = function() {
+        var line,
+            message                         = this.data.message.join('\r');
 
-            for ( var i in this.data.values ) {
-                this.data.message               = this.data.message.replace( '%' + i + '%', this.data.values[i] );
-            }
-            NodeBot.Mud.pemit( this.data.requester, this.data.message );
+        for (var i in this.data.values) {
+            NodeBot.audit('Finger', 'Replacing %s', i);
+            message                         = message.replace('\{' + i + '\}', this.data.values[i].toString().replace(',','%,'));
+        }
+
+        var output                          = message.split('\r');
+        while (line = output.shift()) {
+            NodeBot.Mud.pemit(this.data.requester,line);
         }
     };
 
-    callbacks.getVar = function( val ) {
-        val                                 = val.replace( '\n', '' );
-
-        this.parent.data.values[this.data.key] = val;
-    };
-
-    callbacks.pmatch = function( target ) {
-        target                              = target.replace( '\n', '' );
+    /**
+     * Validates that the pmatch response is a valid target.
+     * @param target
+     */
+    callbacks.finger.matchTarget = function(target) {
+        var proc                        = this.parent;
 
         // Valid target?
         if ( /^#\d+$/.test( target ) ) {
+            proc.data.target                = target;
+            proc.data.message.push(util.format(NodeBot.config.output.header, '{name}'));
+            proc.data.message.push('[ljust(ansi(hw, Alias:) {alias}, 39 )][ljust( ansi(hw, {connected}:) {connectTime}, 39 )]');
+            proc.data.message.push('[ljust(ansi(hw, Sex:) {sex}, 39 )][ljust( ansi(hw, {idle}:) {idleTime}, 39 )]');
+            proc.data.message.push('[ljust(ansi(hw, Email:) {email}, 39 )][ljust( ansi(hw, Mail:) {mailUnread} unread/{mailTotal} total, 39 )]');
+            proc.data.message.push(NodeBot.config.output.mid);
+            proc.data.message.push(NodeBot.config.output.tail);
 
-            NodeBot.log( 'Finger', "matchName returned a valid target." );
-
-            this.parent.data.matchedTarget  = target;
-
-            this.parent.data.message        = util.format( NodeBot.config.output.header, 'Finger for %name%' );
-            this.parent.data.message       += NodeBot.config.output.tail;
-
-            var name                        = this.parent.spawn( { key : 'name' }, callbacks.getVar );
-            NodeBot.Mud.name( name.pid, this.parent.data.matchedTarget );
-
-            var alias                       = this.parent.spawn( { key : 'alias' }, callbacks.getVar );
-            NodeBot.Mud.alias( alias.pid, this.parent.data.matchedTarget );
+            NodeBot.Mud.name(proc.spawn({key:'name'}, callbacks.finger.variable), proc.data.target);
+            NodeBot.Mud.alias(proc.spawn({key:'alias'}, callbacks.finger.variable), proc.data.target);
+            NodeBot.Mud.get(proc.spawn({key:'sex'},callbacks.finger.variable), proc.data.target, 'sex');
+            NodeBot.Mud.conn(proc.spawn({},callbacks.finger.connected), proc.data.target);
+            NodeBot.Mud.idle(proc.spawn({},callbacks.finger.idle), proc.data.target);
+            NodeBot.Mud.get(proc.spawn({},callbacks.finger.email), proc.data.target, 'email');
+            NodeBot.Mud.mail(proc.spawn({},callbacks.finger.mail), proc.data.target);
         }
         // Not a player
         else {
-            NodeBot.log( 'Finger', "matchName returned an invalid target." );
-            NodeBot.Mud.pemit( this.parent.data.requester, NodeBot.config.output.prefix + " %s is not a valid character.", '+finger', this.parent.data.target );
+            NodeBot.debug( 'Finger', 'matchTarget returned an invalid target.' );
+            proc.data.message.push(util.format(NodeBot.config.output.prefix + " %s is not a valid character.", 'finger', proc.data.target));
         }
     };
+
+    /**
+     * Assigns a data variable for replacement.
+     * @param value
+     */
+    callbacks.finger.variable = function(value) {
+        NodeBot.audit('Finger', '  Key:', this.data.key);
+        NodeBot.audit('Finger', '  Value:', value);
+        var proc                            = this.parent;
+        proc.data.values[this.data.key]     = value;
+    };
+
+    /**
+     * Assigns the user's connected time.
+     * @param value
+     */
+    callbacks.finger.connected = function(value) {
+        var proc                            = this.parent;
+
+        if (value > -1) {
+            proc.data.values.connected      = 'On For';
+            proc.data.values.connectTime    = value + 's';
+        }
+        else {
+            proc.data.values.connected      = 'Last On';
+            NodeBot.Mud.get(proc.spawn({key:'connectTime'},callbacks.finger.date), proc.data.target, 'LAST_CONNECT');
+        }
+    };
+
+    /**
+     * Assigns the user's idle time.
+     * @param value
+     */
+    callbacks.finger.idle = function(value) {
+        var proc                            = this.parent;
+
+        if (value > -1) {
+            proc.data.values.idle           = 'Idle';
+            proc.data.values.idleTime       = value + 's';
+        }
+        else {
+            proc.data.values.idle           = 'Last Off';
+            NodeBot.Mud.get(proc.spawn({key:'idleTime'},callbacks.finger.date), proc.data.target, 'LAST_DISCONNECT');
+        }
+    };
+
+    /**
+     * Parses a date value.
+     * @param value
+     */
+    callbacks.finger.date = function(value) {
+        var proc                            = this.parent;
+
+        var dt                              = new Date(value * 1000);
+        var month                           = dt.getMonth().toString();
+        var date                            = dt.getDate().toString();
+        var year                            = dt.getFullYear().toString();
+
+        switch (month) {
+            case '0' : month = 'Jan'; break;
+            case '1' : month = 'Feb'; break;
+            case '2' : month = 'Mar'; break;
+            case '3' : month = 'Apr'; break;
+            case '4' : month = 'May'; break;
+            case '5' : month = 'Jun'; break;
+            case '6' : month = 'Jul'; break;
+            case '7' : month = 'Aug'; break;
+            case '8' : month = 'Sep'; break;
+            case '9' : month = 'Oct'; break;
+            case '10' : month = 'Nov'; break;
+            case '11' : month = 'Dec'; break;
+        }
+
+        proc.data.values[this.data.key]     = month + ' ' + date + ', ' + year;
+    };
+
+    callbacks.finger.email = function(value) {
+        var proc                            = this.parent;
+
+        proc.data.values.email              = value.substr(0,1) == '>' ? 'Hidden' : value;
+    };
+
+    callbacks.finger.mail = function(value) {
+        var proc                            = this.parent;
+
+        var mail                            = value.split(' ');
+        proc.data.values.mailUnread         = mail[1];
+        proc.data.values.mailTotal          = parseInt(mail[0]) + parseInt(mail[1]) + parseInt(mail[2]);
+    }
 };
 
 module.exports                              = new Finger();
