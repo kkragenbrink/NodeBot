@@ -10,6 +10,7 @@
 var config = {
     // The list of plugins you want to use.
     plugins                 : ['Finger'],
+    cmdPrefix               : '\\+\\+',
 
     // Output decorators.
     output : {
