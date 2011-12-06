@@ -25,7 +25,10 @@ var Finger = function() {
             requester                       : requester,
             target                          : args == 'me' ? requester : args,
             values                          : {},
-            message                         : new Array()
+            message                         : [],
+            _debug                          : switches.has('debug'),
+            _start                          : (new Date()).getTime(),
+            _end                            : 0
         };
 
         var proc                            = NodeBot.ProcessManager.createProcess(data, callbacks.finger.complete);
@@ -49,6 +52,11 @@ var Finger = function() {
         var output                          = message.split('\r');
         while (line = output.shift()) {
             NodeBot.Mud.pemit(this.data.requester,line);
+        }
+        this.data._end                      = (new Date()).getTime();
+
+        if (this.data._debug) {
+            NodeBot.Mud.pemit(this.data.requester,'Completed in ' + (this.data._end - this.data._start) + ' milliseconds.');
         }
     };
 
@@ -142,18 +150,18 @@ var Finger = function() {
         var year                            = dt.getFullYear().toString();
 
         switch (month) {
-            case '0' : month = 'Jan'; break;
-            case '1' : month = 'Feb'; break;
-            case '2' : month = 'Mar'; break;
-            case '3' : month = 'Apr'; break;
-            case '4' : month = 'May'; break;
-            case '5' : month = 'Jun'; break;
-            case '6' : month = 'Jul'; break;
-            case '7' : month = 'Aug'; break;
-            case '8' : month = 'Sep'; break;
-            case '9' : month = 'Oct'; break;
-            case '10' : month = 'Nov'; break;
-            case '11' : month = 'Dec'; break;
+            case '0'    : month             = 'Jan'; break;
+            case '1'    : month             = 'Feb'; break;
+            case '2'    : month             = 'Mar'; break;
+            case '3'    : month             = 'Apr'; break;
+            case '4'    : month             = 'May'; break;
+            case '5'    : month             = 'Jun'; break;
+            case '6'    : month             = 'Jul'; break;
+            case '7'    : month             = 'Aug'; break;
+            case '8'    : month             = 'Sep'; break;
+            case '9'    : month             = 'Oct'; break;
+            case '10'   : month             = 'Nov'; break;
+            case '11'   : month             = 'Dec'; break;
         }
 
         proc.data.values[this.data.key]     = month + ' ' + date + ', ' + year;

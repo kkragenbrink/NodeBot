@@ -12,12 +12,13 @@
  * Bootstraps the NodeBot and initializes its plugins for run.
  */
 var NodeBot = function() {
-    var version             = '0.6.1';
+    var version             = '0.7.0';
 
     var self                = this;
     var libraries = {
         Controller          : false,
         Connection          : false,
+        Collection          : false,
         Log                 : false,
         Mud                 : false,
         Process             : false,
