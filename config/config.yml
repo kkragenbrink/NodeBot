@@ -1,0 +1,17 @@
+---
+  command_prefix            : '++'
+  log_level                 : 'debug'
+
+  mud:
+    host                    : 'localhost'
+    port                    : 2067
+    user                    : 'NodeBot'
+    pass                    : '!'
+
+  plugins                   : [finger]
+
+  output:
+    header                  : '[center(< %s >, 78, =)]'
+    mid                     : '[repeat(-,78)]'
+    prefix                  : '\[%s\]'
+    tail                    : '[repeat(=, 78)]'

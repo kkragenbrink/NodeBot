@@ -3,45 +3,17 @@
  *
  * @author  Kevin "Loki" Kragenbrink <kevin@writh.net>
  * @updated 12 November 2011
- * @version 0.4.0
+ * @version 0.6.0
  */
-
-// Update this configuration section with your information.
-var config = {
-    // The list of plugins you want to use.
-    plugins                 : ['Finger'],
-    cmdPrefix               : '\\+\\+',
-
-    // Output decorators.
-    output : {
-        header              : '[center(< %s >, 78, =)]',
-        mid                 : '[repeat(-, 78)]',
-        prefix              : '\\[%s\\]',
-        tail                : '[repeat(=, 78)]'
-    },
-
-    // Connection information.
-    mud : {
-        host                : 'localhost',  // The hostname of your MUSH; best if localhost
-        port                : 2067,         // The port of your MUSH
-        user                : 'NodeBot',    // The username of your bot.
-        pass                : '!'           // The password of your bot.
-    },
-
-    // The level of details you want to see in your logs. (audit, trace, debug, log, warn, or error)
-    logLevel                : 'log'
-};
-// *** STOP ***
-// Do not edit below this line.
-// *** STOP ***
 
 /**
  * NodeBot Bootstrap Script
  *
  * Bootstraps the NodeBot and initializes its plugins for run.
- * @param config
  */
-var NodeBot = function( config ) {
+var NodeBot = function() {
+    var version             = '0.6.0';
+
     var self                = this;
     var libraries = {
         Controller          : false,
@@ -52,8 +24,7 @@ var NodeBot = function( config ) {
         ProcessManager      : false
     };
     var plugins             = {};
-    var version             = '0.6.0';
-    self.config             = config;
+    self.config             = {};
     self.prelog             = [];
 
     /**
@@ -62,7 +33,7 @@ var NodeBot = function( config ) {
      */
     function Prelog( type ) {
         return function() {
-            var args = Array.prototype.slice.call( arguments, 0 );
+            var args = Array.prototype.slice.call(arguments, 0);
             args.unshift( type );
             self.prelog.push( args );
         }
@@ -79,10 +50,38 @@ var NodeBot = function( config ) {
     function init() {
 
         self.log( 'NodeBot', "NodeBot %s starting up.", version );
-        loadLibraries();
-        loadPlugins();
-        self.Connection.connect();
+
+        loadConfig(function() {
+            loadLibraries();
+            loadPlugins();
+            self.Connection.connect();
+        });
     }
+
+    /**
+     * Loads the configuration file.
+     * @private
+     */
+    function loadConfig(callback) {
+        var fs                          = require('fs');
+        var yaml                        = require('js-yaml');
+
+        fs.readFile('./config/config.yml', 'utf8', function(err, data) {
+
+            if (err) {
+                throw new Error("Could not load configuration.");
+            }
+
+            try {
+                self.config             = yaml.load(data);
+            }
+            catch (e) {
+                throw new Error("Could not parse configuration. " + e.message);
+            }
+            callback();
+        });
+    }
+
 
     /**
      * Iterates through the libraries and initializes them.
@@ -131,8 +130,13 @@ var NodeBot = function( config ) {
     function loadPlugin( Plugin ) {
 
         var pluginName                  = Plugin.toLowerCase();
-        plugins[pluginName]             = require( './plugins/' + Plugin + '.js' );
-        plugins[pluginName].init( self );
+        try {
+            plugins[pluginName]             = require( './plugins/' + Plugin + '.js' );
+            plugins[pluginName].init( self );
+        }
+        catch (e) {
+            throw new Error("Failed to load plugin '" + pluginName + "': " + e.message);
+        }
     }
 
     // Go!
@@ -140,4 +144,4 @@ var NodeBot = function( config ) {
     return self;
 };
 
-module.exports              = new NodeBot( config );
+module.exports              = new NodeBot();
