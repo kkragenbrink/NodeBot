@@ -1,8 +1,15 @@
 /**
- * 
+ * COMMAND: finger <target>
+ *
+ * Provides status and user-defined information about <target>.
+ *
+ * Config options:
+ *   [finger]
+ *       allow_afinger          : true
+ *       debug                  : false
  */
 var Finger = function() {
-    var version                             = '0.4.1';
+    var version                             = '0.5.0';
     var self                                = this;
 
     var NodeBot                             = {};
@@ -26,7 +33,6 @@ var Finger = function() {
             target                          : args == 'me' ? requester : args,
             values                          : {},
             message                         : [],
-            _debug                          : switches.has('debug'),
             _start                          : (new Date()).getTime(),
             _end                            : 0
         };
@@ -55,7 +61,7 @@ var Finger = function() {
         }
         this.data._end                      = (new Date()).getTime();
 
-        if (this.data._debug) {
+        if (NodeBot.config.finger.debug === true) {
             NodeBot.Mud.pemit(this.data.requester,'Completed in ' + (this.data._end - this.data._start) + ' milliseconds.');
         }
     };
