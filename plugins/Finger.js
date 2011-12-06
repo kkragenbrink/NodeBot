@@ -1,5 +1,10 @@
+/**
+ * 
+ */
 var Finger = function() {
+    var version                             = '0.4.1';
     var self                                = this;
+
     var NodeBot                             = {};
     var callbacks                           = {};
     callbacks.finger                        = {};
@@ -9,8 +14,8 @@ var Finger = function() {
 
         NodeBot                             = NB;
         NodeBot.Controller.registerCommand('finger', self.finger);
-        NodeBot.Mud.setup.push( '@switch hasattr(%!,ACONNECT)=1,{@edit me/ACONNECT=^,&LAST_CONNECT %%#=[secs()];},{@ACONNECT me=&LAST_CONNECT %%#=[secs()];}' );
-        NodeBot.Mud.setup.push( '@switch hasattr(%!,ADISCONNECT)=1,{@edit me/ADISCONNECTA=^,&LAST_DISCONNECT %%#=[secs()];},{@ADISCONNECT me=&LAST_DISCONNECT %%#=[secs()];}' );
+        NodeBot.Mud.setup.push( '@switch hasattr(%!,ACONNECT)=1,{@edit me/ACONNECT=^,&LAST_CONNECT %%#=%[secs%(%)%];},{@ACONNECT me=&LAST_CONNECT %%#=%[secs%(%)%];}' );
+        NodeBot.Mud.setup.push( '@switch hasattr(%!,ADISCONNECT)=1,{@edit me/ADISCONNECTA=^,&LAST_DISCONNECT %%#=%[secs%(%)%];},{@ADISCONNECT me=&LAST_DISCONNECT %%#=%[secs%(%)%];}' );
     };
 
     self.finger = function(requester, switches, args) {
@@ -18,7 +23,7 @@ var Finger = function() {
         NodeBot.debug('Finger', "Handling request for %s.", requester);
         var data = {
             requester                       : requester,
-            target                          : args,
+            target                          : args == 'me' ? requester : args,
             values                          : {},
             message                         : new Array()
         };
