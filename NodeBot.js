@@ -3,7 +3,7 @@
  *
  * @author  Kevin "Loki" Kragenbrink <kevin@writh.net>
  * @updated 12 November 2011
- * @version 0.6.0
+ * @version 0.6.1
  */
 
 /**
@@ -12,7 +12,7 @@
  * Bootstraps the NodeBot and initializes its plugins for run.
  */
 var NodeBot = function() {
-    var version             = '0.6.0';
+    var version             = '0.6.1';
 
     var self                = this;
     var libraries = {

@@ -1,5 +1,5 @@
 ---
-  command_prefix            : '++'
+  command_prefix            : '\+'
   log_level                 : 'debug'
 
   mud:
