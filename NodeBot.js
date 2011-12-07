@@ -2,8 +2,8 @@
  * NodeBot
  *
  * @author  Kevin "Loki" Kragenbrink <kevin@writh.net>
- * @updated 12 November 2011
- * @version 0.6.1
+ * @updated 7th December 2011
+ * @version 0.8.0
  */
 
 /**
@@ -16,9 +16,10 @@ var NodeBot = function() {
 
     var self                = this;
     var libraries = {
+        Util                : false,
         Controller          : false,
         Connection          : false,
-        Collection          : false,
+        Database            : false,
         Log                 : false,
         Mud                 : false,
         Process             : false,
@@ -32,17 +33,17 @@ var NodeBot = function() {
      * Creates a log store until the Log class is initialized.
      * @param type
      */
-    function Prelog( type ) {
+    function Prelog(type) {
         return function() {
             var args = Array.prototype.slice.call(arguments, 0);
-            args.unshift( type );
-            self.prelog.push( args );
+            args.unshift(type);
+            self.prelog.push(args);
         }
     }
-    self.debug = new Prelog( 'debug' );
-    self.error = new Prelog( 'error' );
-    self.log = new Prelog( 'log' );
-    self.warn = new Prelog( 'warn' );
+    self.debug              = new Prelog('debug');
+    self.error              = new Prelog('error');
+    self.log                = new Prelog('log');
+    self.warn               = new Prelog('warn');
 
     /**
      * Initializes NodeBot and instantiates all libraries and plugins.
@@ -50,7 +51,7 @@ var NodeBot = function() {
      */
     function init() {
 
-        self.log( 'NodeBot', "NodeBot %s starting up.", version );
+        self.log('NodeBot', "NodeBot %s starting up.", version);
 
         loadConfig(function() {
             loadLibraries();
@@ -79,6 +80,7 @@ var NodeBot = function() {
             catch (e) {
                 throw new Error("Could not parse configuration. " + e.message);
             }
+
             callback();
         });
     }
@@ -89,8 +91,8 @@ var NodeBot = function() {
      * @private
      */
     function loadLibraries() {
-        for ( var i in libraries ) {
-            loadLibrary( i );
+        for (var i in libraries) {
+            loadLibrary(i);
         }
         
     }
@@ -100,8 +102,8 @@ var NodeBot = function() {
      * @private
      */
     function loadPlugins() {
-        for ( var i in self.config.plugins ) {
-            loadPlugin( self.config.plugins[i] );
+        for (var i in self.config.plugins) {
+            loadPlugin(self.config.plugins[i]);
         }
     }
 
@@ -110,13 +112,13 @@ var NodeBot = function() {
      * @param Library
      * @private
      */
-    function loadLibrary( Library ) {
+    function loadLibrary(Library) {
 
-        if ( !libraries[Library] ) {
-            self[Library]                   = require( './lib/' + Library );
+        if (!libraries[Library]) {
+            self[Library]                   = require('./lib/' + Library);
 
-            if ( typeof self[Library].init === 'function' ) {
-                self[Library].init( self );
+            if (typeof self[Library].init === 'function') {
+                self[Library].init(self);
             }
 
             libraries[Library]              = true;
@@ -128,12 +130,12 @@ var NodeBot = function() {
      * @param Plugin
      * @private
      */
-    function loadPlugin( Plugin ) {
+    function loadPlugin(Plugin) {
 
         var pluginName                  = Plugin.toLowerCase();
         try {
-            plugins[pluginName]             = require( './plugins/' + Plugin + '.js' );
-            plugins[pluginName].init( self );
+            plugins[pluginName]             = require('./plugins/' + Plugin + '.js');
+            plugins[pluginName].init(self);
         }
         catch (e) {
             throw new Error("Failed to load plugin '" + pluginName + "': " + e.message);

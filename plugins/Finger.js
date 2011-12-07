@@ -15,18 +15,17 @@ var Finger = function() {
     var NodeBot                                             = {};
     var callbacks                                           = {};
     callbacks.finger                                        = {};
-    var util                                                = require('util');
 
     /**
      * 
      * @param NB
      */
-    self.init = function( NB ) {
+    self.init = function(NB) {
 
         NodeBot                                             = NB;
         NodeBot.Controller.registerCommand('finger', self.finger);
-        NodeBot.Mud.setup.push( '@switch hasattr(%!,ACONNECT)=1,{@edit me/ACONNECT=^,&LAST_CONNECT %%#=%[secs%(%)%];},{@ACONNECT me=&LAST_CONNECT %%#=%[secs%(%)%];}' );
-        NodeBot.Mud.setup.push( '@switch hasattr(%!,ADISCONNECT)=1,{@edit me/ADISCONNECTA=^,&LAST_DISCONNECT %%#=%[secs%(%)%];},{@ADISCONNECT me=&LAST_DISCONNECT %%#=%[secs%(%)%];}' );
+        NodeBot.Mud.setup.push('@switch hasattr(%!,ACONNECT)=1,{@edit me/ACONNECT=^,&LAST_CONNECT %%#=%[secs%(%)%];},{@ACONNECT me=&LAST_CONNECT %%#=%[secs%(%)%];}');
+        NodeBot.Mud.setup.push('@switch hasattr(%!,ADISCONNECT)=1,{@edit me/ADISCONNECTA=^,&LAST_DISCONNECT %%#=%[secs%(%)%];},{@ADISCONNECT me=&LAST_DISCONNECT %%#=%[secs%(%)%];}');
 
         // Setup configuration.
         NodeBot.config.Finger                               = NodeBot.config.Finger || {};
@@ -79,7 +78,7 @@ var Finger = function() {
         this.data._end                                      = (new Date()).getTime();
 
         if (NodeBot.config.Finger.debug === true) {
-            NodeBot.Mud.pemit(this.data.requester,'Completed in ' + (this.data._end - this.data._start) + ' milliseconds.');
+            NodeBot.Mud.pemit(this.data.requester, NodeBot.Util.format('Completed in %d milliseconds.', (this.data._end - this.data._start)));
         }
     };
 
@@ -91,12 +90,12 @@ var Finger = function() {
         var proc                                            = this.parent;
 
         // Valid target?
-        if ( /^#\d+$/.test( target ) ) {
+        if (/^#\d+$/.test(target)) {
             proc.data.target                                = target;
-            proc.data.message.push(util.format(NodeBot.config.output.header, '{name}'));
-            proc.data.message.push('[ljust(ansi(hw, Alias:) {alias}, 39 )][ljust( ansi(hw, {connected}:) {connectTime}, 39 )]');
-            proc.data.message.push('[ljust(ansi(hw, Sex:) {sex}, 39 )][ljust( ansi(hw, {idle}:) {idleTime}, 39 )]');
-            proc.data.message.push('[ljust(ansi(hw, Email:) {email}, 39 )][ljust( ansi(hw, Mail:) {mailUnread} unread/{mailTotal} total, 39 )]');
+            proc.data.message.push(NodeBot.Util.format(NodeBot.config.output.header, '{name}'));
+            proc.data.message.push('[ljust(ansi(hw, Alias:) {alias}, 39)][ljust(ansi(hw, {connected}:) {connectTime}, 39)]');
+            proc.data.message.push('[ljust(ansi(hw, Sex:) {sex}, 39)][ljust(ansi(hw, {idle}:) {idleTime}, 39)]');
+            proc.data.message.push('[ljust(ansi(hw, Email:) {email}, 39)][ljust(ansi(hw, Mail:) {mailUnread} unread/{mailTotal} total, 39)]');
             proc.data.message.push(NodeBot.config.output.mid);
             proc.data.message.push(NodeBot.config.output.tail);
 
@@ -110,8 +109,8 @@ var Finger = function() {
         }
         // Not a player
         else {
-            NodeBot.debug( 'Finger', 'matchTarget returned an invalid target.' );
-            proc.data.message.push(util.format(NodeBot.config.output.prefix + " %s is not a valid character.", 'finger', proc.data.target));
+            NodeBot.debug('Finger', 'matchTarget returned an invalid target.');
+            proc.data.message.push(NodeBot.Util.format(NodeBot.config.output.prefix + " %s is not a valid character.", 'finger', proc.data.target));
         }
     };
 

@@ -2,12 +2,15 @@ command_prefix              : '\+'
 log_level                   : 'log'
 
 mud:
-    host                    : 'localhost'
+    hostname                : 'localhost'
     port                    : 2067
-    user                    : 'NodeBot'
-    pass                    : '!'
+    username                : 'NodeBot'
+    password                : '!'
 
-plugins                     : [finger]
+database:
+    adapter                 : 'SQLite'
+
+plugins                     : [Finger]
 
 output:
     header                  : '[center(< %s >, 78, =)]'
