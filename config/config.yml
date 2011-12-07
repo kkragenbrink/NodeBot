@@ -1,16 +1,15 @@
----
-  command_prefix            : '\+'
-  log_level                 : 'debug'
+command_prefix              : '\+'
+log_level                   : 'log'
 
-  mud:
+mud:
     host                    : 'localhost'
     port                    : 2067
     user                    : 'NodeBot'
     pass                    : '!'
 
-  plugins                   : [finger]
+plugins                     : [finger]
 
-  output:
+output:
     header                  : '[center(< %s >, 78, =)]'
     mid                     : '[repeat(-,78)]'
     prefix                  : '\[%s\]'

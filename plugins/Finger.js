@@ -4,41 +4,58 @@
  * Provides status and user-defined information about <target>.
  *
  * Config options:
- *   [finger]
+ *   [Finger]
  *       allow_afinger          : true
  *       debug                  : false
  */
 var Finger = function() {
-    var version                             = '0.5.0';
-    var self                                = this;
+    var version                                             = '0.5.0';
+    var self                                                = this;
 
-    var NodeBot                             = {};
-    var callbacks                           = {};
-    callbacks.finger                        = {};
-    var util                                = require('util');
+    var NodeBot                                             = {};
+    var callbacks                                           = {};
+    callbacks.finger                                        = {};
+    var util                                                = require('util');
 
+    /**
+     * 
+     * @param NB
+     */
     self.init = function( NB ) {
 
-        NodeBot                             = NB;
+        NodeBot                                             = NB;
         NodeBot.Controller.registerCommand('finger', self.finger);
         NodeBot.Mud.setup.push( '@switch hasattr(%!,ACONNECT)=1,{@edit me/ACONNECT=^,&LAST_CONNECT %%#=%[secs%(%)%];},{@ACONNECT me=&LAST_CONNECT %%#=%[secs%(%)%];}' );
         NodeBot.Mud.setup.push( '@switch hasattr(%!,ADISCONNECT)=1,{@edit me/ADISCONNECTA=^,&LAST_DISCONNECT %%#=%[secs%(%)%];},{@ADISCONNECT me=&LAST_DISCONNECT %%#=%[secs%(%)%];}' );
+
+        // Setup configuration.
+        NodeBot.config.Finger                               = NodeBot.config.Finger || {};
+        NodeBot.config.Finger.allow_afinger                 = NodeBot.config.Finger.allow_afinger || true;
+        NodeBot.config.Finger.debug                         = NodeBot.config.Finger.debug || false;
+
     };
 
+    /**
+     * Called by NodeBot when a player uses the finger command.
+     * 
+     * @param requester
+     * @param switches
+     * @param args
+     */
     self.finger = function(requester, switches, args) {
 
         NodeBot.debug('Finger', "Handling request for %s.", requester);
         var data = {
-            requester                       : requester,
-            target                          : args == 'me' ? requester : args,
-            values                          : {},
-            message                         : [],
-            _start                          : (new Date()).getTime(),
-            _end                            : 0
+            requester                                       : requester,
+            target                                          : args == 'me' ? requester : args,
+            values                                          : {},
+            message                                         : [],
+            _start                                          : (new Date()).getTime(),
+            _end                                            : 0
         };
 
-        var proc                            = NodeBot.ProcessManager.createProcess(data, callbacks.finger.complete);
-        var matchTarget                     = proc.spawn({}, callbacks.finger.matchTarget);
+        var proc                                            = NodeBot.ProcessManager.createProcess(data, callbacks.finger.complete);
+        var matchTarget                                     = proc.spawn({}, callbacks.finger.matchTarget);
 
         NodeBot.Mud.pmatch(matchTarget.pid, data.target);
     };
@@ -48,20 +65,20 @@ var Finger = function() {
      */
     callbacks.finger.complete = function() {
         var line,
-            message                         = this.data.message.join('\r');
+            message                                         = this.data.message.join('\r');
 
         for (var i in this.data.values) {
             NodeBot.audit('Finger', 'Replacing %s', i);
-            message                         = message.replace('\{' + i + '\}', this.data.values[i].toString().replace(',','%,'));
+            message                                         = message.replace('\{' + i + '\}', this.data.values[i].toString().replace(',','%,'));
         }
 
-        var output                          = message.split('\r');
+        var output                                          = message.split('\r');
         while (line = output.shift()) {
             NodeBot.Mud.pemit(this.data.requester,line);
         }
-        this.data._end                      = (new Date()).getTime();
+        this.data._end                                      = (new Date()).getTime();
 
-        if (NodeBot.config.finger.debug === true) {
+        if (NodeBot.config.Finger.debug === true) {
             NodeBot.Mud.pemit(this.data.requester,'Completed in ' + (this.data._end - this.data._start) + ' milliseconds.');
         }
     };
@@ -71,11 +88,11 @@ var Finger = function() {
      * @param target
      */
     callbacks.finger.matchTarget = function(target) {
-        var proc                        = this.parent;
+        var proc                                            = this.parent;
 
         // Valid target?
         if ( /^#\d+$/.test( target ) ) {
-            proc.data.target                = target;
+            proc.data.target                                = target;
             proc.data.message.push(util.format(NodeBot.config.output.header, '{name}'));
             proc.data.message.push('[ljust(ansi(hw, Alias:) {alias}, 39 )][ljust( ansi(hw, {connected}:) {connectTime}, 39 )]');
             proc.data.message.push('[ljust(ansi(hw, Sex:) {sex}, 39 )][ljust( ansi(hw, {idle}:) {idleTime}, 39 )]');
@@ -105,8 +122,8 @@ var Finger = function() {
     callbacks.finger.variable = function(value) {
         NodeBot.audit('Finger', '  Key:', this.data.key);
         NodeBot.audit('Finger', '  Value:', value);
-        var proc                            = this.parent;
-        proc.data.values[this.data.key]     = value;
+        var proc                                            = this.parent;
+        proc.data.values[this.data.key]                     = value;
     };
 
     /**
@@ -114,14 +131,14 @@ var Finger = function() {
      * @param value
      */
     callbacks.finger.connected = function(value) {
-        var proc                            = this.parent;
+        var proc                                            = this.parent;
 
         if (value > -1) {
-            proc.data.values.connected      = 'On For';
-            proc.data.values.connectTime    = value + 's';
+            proc.data.values.connected                      = 'On For';
+            proc.data.values.connectTime                    = value + 's';
         }
         else {
-            proc.data.values.connected      = 'Last On';
+            proc.data.values.connected                      = 'Last On';
             NodeBot.Mud.get(proc.spawn({key:'connectTime'},callbacks.finger.date), proc.data.target, 'LAST_CONNECT');
         }
     };
@@ -131,14 +148,14 @@ var Finger = function() {
      * @param value
      */
     callbacks.finger.idle = function(value) {
-        var proc                            = this.parent;
+        var proc                                            = this.parent;
 
         if (value > -1) {
-            proc.data.values.idle           = 'Idle';
-            proc.data.values.idleTime       = value + 's';
+            proc.data.values.idle                           = 'Idle';
+            proc.data.values.idleTime                       = value + 's';
         }
         else {
-            proc.data.values.idle           = 'Last Off';
+            proc.data.values.idle                           = 'Last Off';
             NodeBot.Mud.get(proc.spawn({key:'idleTime'},callbacks.finger.date), proc.data.target, 'LAST_DISCONNECT');
         }
     };
@@ -148,44 +165,44 @@ var Finger = function() {
      * @param value
      */
     callbacks.finger.date = function(value) {
-        var proc                            = this.parent;
+        var proc                                            = this.parent;
 
-        var dt                              = new Date(value * 1000);
-        var month                           = dt.getMonth().toString();
-        var date                            = dt.getDate().toString();
-        var year                            = dt.getFullYear().toString();
+        var dt                                              = new Date(value * 1000);
+        var month                                           = dt.getMonth().toString();
+        var date                                            = dt.getDate().toString();
+        var year                                            = dt.getFullYear().toString();
 
         switch (month) {
-            case '0'    : month             = 'Jan'; break;
-            case '1'    : month             = 'Feb'; break;
-            case '2'    : month             = 'Mar'; break;
-            case '3'    : month             = 'Apr'; break;
-            case '4'    : month             = 'May'; break;
-            case '5'    : month             = 'Jun'; break;
-            case '6'    : month             = 'Jul'; break;
-            case '7'    : month             = 'Aug'; break;
-            case '8'    : month             = 'Sep'; break;
-            case '9'    : month             = 'Oct'; break;
-            case '10'   : month             = 'Nov'; break;
-            case '11'   : month             = 'Dec'; break;
+            case '0'    : month                             = 'Jan'; break;
+            case '1'    : month                             = 'Feb'; break;
+            case '2'    : month                             = 'Mar'; break;
+            case '3'    : month                             = 'Apr'; break;
+            case '4'    : month                             = 'May'; break;
+            case '5'    : month                             = 'Jun'; break;
+            case '6'    : month                             = 'Jul'; break;
+            case '7'    : month                             = 'Aug'; break;
+            case '8'    : month                             = 'Sep'; break;
+            case '9'    : month                             = 'Oct'; break;
+            case '10'   : month                             = 'Nov'; break;
+            case '11'   : month                             = 'Dec'; break;
         }
 
-        proc.data.values[this.data.key]     = month + ' ' + date + ', ' + year;
+        proc.data.values[this.data.key]                     = month + ' ' + date + ', ' + year;
     };
 
     callbacks.finger.email = function(value) {
-        var proc                            = this.parent;
+        var proc                                            = this.parent;
 
-        proc.data.values.email              = value.substr(0,1) == '>' ? 'Hidden' : value;
+        proc.data.values.email                              = value.substr(0,1) == '>' ? 'Hidden' : value;
     };
 
     callbacks.finger.mail = function(value) {
-        var proc                            = this.parent;
+        var proc                                            = this.parent;
 
-        var mail                            = value.split(' ');
-        proc.data.values.mailUnread         = mail[1];
-        proc.data.values.mailTotal          = parseInt(mail[0]) + parseInt(mail[1]) + parseInt(mail[2]);
+        var mail                                            = value.split(' ');
+        proc.data.values.mailUnread                         = mail[1];
+        proc.data.values.mailTotal                          = parseInt(mail[0]) + parseInt(mail[1]) + parseInt(mail[2]);
     }
 };
 
-module.exports                              = new Finger();
+module.exports                                              = new Finger();
