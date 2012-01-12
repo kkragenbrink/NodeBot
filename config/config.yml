@@ -1,4 +1,8 @@
 command_prefix              : '\+'
+
+database:
+    adapter                 : 'SQLite'
+
 log_level                   : 'log'
 
 mud:
@@ -7,13 +11,10 @@ mud:
     username                : 'NodeBot'
     password                : '!'
 
-database:
-    adapter                 : 'SQLite'
-
-plugins                     : [Finger]
-
 output:
     header                  : '[center(< %s >, 78, =)]'
     mid                     : '[repeat(-,78)]'
     prefix                  : '\[%s\]'
     tail                    : '[repeat(=, 78)]'
+
+plugins                     : [Finger]

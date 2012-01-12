@@ -85,7 +85,6 @@ var NodeBot = function() {
         });
     }
 
-
     /**
      * Iterates through the libraries and initializes them.
      * @private
