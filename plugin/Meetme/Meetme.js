@@ -6,7 +6,7 @@
  *    \  /\  /| |  | | |_| | | |_| | | |  __/ |_
  *     \/  \/ |_|  |_|\__|_| |_(_)_| |_|\___|\__|
  *
- * @created     19th January 2012
+ * @created     20th January 2012
  * @edited      21st January 2012
  * @package     NodeBot
  *
@@ -32,40 +32,14 @@
  */
 
 /**
- * A central class for logging.
- *
- * This class formats all log entries in a useful format, as well as handles
- * the formatting of logstrings using Util.format().
+ * A plugin to allow players to meet other players with ease.
  *
  * @author      Kevin Kragenbrink <kevin@writh.net>
- * @version     0.1.1
- * @subpackage  Lib
+ * @version     0.1.0
+ * @subpackage  Plugin
+ * @plugin      Meetme
  * @singleton
  */
 module.exports = (function() {
-    function Log(type) {
-        var name                        = type;
 
-        if (!(name in console)) {
-            type                        = 'log';
-        }
-
-        return function() {
-            var Util                    = require('../lib/Util');
-            var args                    = Array.prototype.slice.call( arguments, 0 );
-            var date                    = (new Date).getTime();
-            var caller                  = args.shift();
-            var message                 = Util.format.apply(Util, args);
-                message                 = Util.format('%s [%s:%s] %s', date, caller, name, message);
-
-            console[type].call(console, message);
-        }
-    }
-
-    this.debug                          = new Log('debug');
-    this.error                          = new Log('error');
-    this.log                            = new Log('log');
-    this.warn                           = new Log('warn');
-
-    return this;
 })();

@@ -7,7 +7,7 @@
  *     \/  \/ |_|  |_|\__|_| |_(_)_| |_|\___|\__|
  *
  * @created     19th January 2012
- * @edited      20th January 2012
+ * @edited      21st January 2012
  * @package     NodeBot
  *
  * Copyright (C) 2012 Kevin Kragenbrink <kevin@writh.net>
@@ -37,16 +37,16 @@
  * Once NodeBot is established, it will load the requested user Plugins.
  *
  * @author      Kevin Kragenbrink <kevin@writh.net>
- * @version     0.1.0
+ * @version     0.1.1
  * @subpackage  Core
  * @singleton
  */
 (function() {
-    process.versions.nodebot            = '0.1.0';
+    process.versions.nodebot            = '0.1.1';
     var COMPONENT                       = 'NodeBot';
     var Config;                         // The lib/Config module.
     var Log;                            // The libLog module.
-    var Util                            = require('util');
+    var Util                            = require('./lib/Util');
 
     // Establishes the Log module.
     Log                                 = require('./lib/Log');
@@ -79,7 +79,7 @@
      */
     function registerPlugin(name) {
         Log.log('NodeBot', 'Registering %s plugin.', name);
-        require(Util.format('./plugin/%s', name));
+        require(Util.format('./plugin/%s/%s', name, name));
     }
 
     /**
