@@ -1,149 +1,108 @@
 /**
- * NodeBot
+ * __          __   _ _   _                  _
+ * \ \        / /  (_) | | |                | |
+ *  \ \  /\  / / __ _| |_| |__    _ __   ___| |_
+ *   \ \/  \/ / '__| | __| '_ \  | '_ \ / _ \ __|
+ *    \  /\  /| |  | | |_| | | |_| | | |  __/ |_
+ *     \/  \/ |_|  |_|\__|_| |_(_)_| |_|\___|\__|
  *
- * @author  Kevin "Loki" Kragenbrink <kevin@writh.net>
- * @updated 7th December 2011
- * @version 0.8.0
+ * @created     19th January 2012
+ * @edited      20th January 2012
+ * @package     NodeBot
+ *
+ * Copyright (C) 2012 Kevin Kragenbrink <kevin@writh.net>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS IN THE SOFTWARE.
  */
 
 /**
- * NodeBot Bootstrap Script
+ * This class instantiates NodeBot as a Singleton.
  *
- * Bootstraps the NodeBot and initializes its plugins for run.
+ * Once NodeBot is established, it will load the requested user Plugins.
+ *
+ * @author      Kevin Kragenbrink <kevin@writh.net>
+ * @version     0.1.0
+ * @subpackage  Core
+ * @singleton
  */
-var NodeBot = function() {
-    var version             = '0.7.0';
+(function() {
+    process.versions.nodebot            = '0.1.0';
+    var COMPONENT                       = 'NodeBot';
+    var Config;                         // The lib/Config module.
+    var Log;                            // The libLog module.
+    var Util                            = require('util');
 
-    var self                = this;
-    var libraries = {
-        Util                : false,
-        Controller          : false,
-        Connection          : false,
-        Database            : false,
-        Log                 : false,
-        Mud                 : false,
-        Process             : false,
-        ProcessManager      : false
-    };
-    var plugins             = {};
-    self.config             = {};
-    self.prelog             = [];
+    // Establishes the Log module.
+    Log                                 = require('./lib/Log');
+    Log.log(COMPONENT, 'NodeBot %s starting up.', process.versions.nodebot);
+
+    // Handle various process-specific events.
+    process.on('exit', shutdown);
+    process.on('uncaughtException', exception);
+
+    // Handle configuration file loading.
+    Config                              = require('./lib/Config');
+    Config.on('load', registerPlugins);
+    Config.load('NodeBot');
 
     /**
-     * Creates a log store until the Log class is initialized.
-     * @param type
+     * Handles uncaught exceptions.
+     * @param   err     Error       The exception to handle.
+     * @private
      */
-    function Prelog(type) {
-        return function() {
-            var args = Array.prototype.slice.call(arguments, 0);
-            args.unshift(type);
-            self.prelog.push(args);
+    function exception(err) {
+        if (Log && typeof Log.error === 'function') {
+            Log.error('NodeBot', err);
         }
     }
-    self.debug              = new Prelog('debug');
-    self.error              = new Prelog('error');
-    self.log                = new Prelog('log');
-    self.warn               = new Prelog('warn');
 
     /**
-     * Initializes NodeBot and instantiates all libraries and plugins.
+     * Registers a new plugin with NodeBot.
+     * @param   name    String      The plugin to register.
      * @private
      */
-    function init() {
-
-        self.log('NodeBot', "NodeBot %s starting up.", version);
-
-        loadConfig(function() {
-            loadLibraries();
-            loadPlugins();
-            self.Connection.connect();
-        });
+    function registerPlugin(name) {
+        Log.log('NodeBot', 'Registering %s plugin.', name);
+        require(Util.format('./plugin/%s', name));
     }
 
     /**
-     * Loads the configuration file.
+     * Registers all plugins noted in the NodeBot configuration object.
+     *
+     * @param   config  Object      The NodeBot configuration object.
      * @private
      */
-    function loadConfig(callback) {
-        var fs                          = require('fs');
-        var yaml                        = require('js-yaml');
+    function registerPlugins(config) {
+        var plugins                     = config.plugins;
 
-        fs.readFile('./config/config.yml', 'utf8', function(err, data) {
-
-            if (err) {
-                throw new Error("Could not load configuration.");
+        if (plugins.length > 0) {
+            for (var i in plugins) {
+                registerPlugin(plugins[i]);
             }
-
-            try {
-                self.config             = yaml.load(data);
-            }
-            catch (e) {
-                throw new Error("Could not parse configuration. " + e.message);
-            }
-
-            callback();
-        });
-    }
-
-    /**
-     * Iterates through the libraries and initializes them.
-     * @private
-     */
-    function loadLibraries() {
-        for (var i in libraries) {
-            loadLibrary(i);
-        }
-        
-    }
-
-    /**
-     * Iterates through the requested plugins and initializes them.
-     * @private
-     */
-    function loadPlugins() {
-        for (var i in self.config.plugins) {
-            loadPlugin(self.config.plugins[i]);
         }
     }
 
     /**
-     * Registers a Library.
-     * @param Library
+     * Logs the shutdown event before the process completes.
      * @private
      */
-    function loadLibrary(Library) {
-
-        if (!libraries[Library]) {
-            self[Library]                   = require('./lib/' + Library);
-
-            if (typeof self[Library].init === 'function') {
-                self[Library].init(self);
-            }
-
-            libraries[Library]              = true;
-        }
+    function shutdown() {
+        Log.log(COMPONENT, 'NodeBot shutting down.');
     }
-
-    /**
-     * Registers a Plugin.
-     * @param Plugin
-     * @private
-     */
-    function loadPlugin(Plugin) {
-
-        var pluginName                  = Plugin.toLowerCase();
-        try {
-            plugins[pluginName]             = require('./plugins/' + Plugin + '.js');
-            plugins[pluginName].init(self);
-        }
-        catch (e) {
-            throw new Error("Failed to load plugin '" + pluginName + "': " + e.message);
-        }
-    }
-
-    // Go!
-    init();
-    return self;
-};
-
-module.exports              = new NodeBot();
+})();
