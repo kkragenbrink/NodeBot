@@ -7,7 +7,7 @@
  *     \/  \/ |_|  |_|\__|_| |_(_)_| |_|\___|\__|
  *
  * @created     19th January 2012
- * @edited      21st January 2012
+ * @edited      24th January 2012
  * @package     NodeBot
  *
  * Copyright (C) 2012 Kevin Kragenbrink <kevin@writh.net>
@@ -37,19 +37,19 @@
  * Once NodeBot is established, it will load the requested user Plugins.
  *
  * @author      Kevin Kragenbrink <kevin@writh.net>
- * @version     0.1.1
+ * @version     0.1.2
  * @subpackage  Core
  * @singleton
  */
 (function() {
-    process.versions.nodebot            = '0.1.1';
+    process.versions.nodebot            = '0.1.2';
     var COMPONENT                       = 'NodeBot';
     var Config;                         // The lib/Config module.
     var Log;                            // The libLog module.
-    var Util                            = require('./lib/Util');
+    var Util                            = require('./Lib/Util');
 
     // Establishes the Log module.
-    Log                                 = require('./lib/Log');
+    Log                                 = require('./Lib/Log');
     Log.log(COMPONENT, 'NodeBot %s starting up.', process.versions.nodebot);
 
     // Handle various process-specific events.
@@ -57,7 +57,7 @@
     process.on('uncaughtException', exception);
 
     // Handle configuration file loading.
-    Config                              = require('./lib/Config');
+    Config                              = require('./Lib/Config');
     Config.on('load', registerPlugins);
     Config.load('NodeBot');
 
@@ -68,7 +68,7 @@
      */
     function exception(err) {
         if (Log && typeof Log.error === 'function') {
-            Log.error('NodeBot', err);
+            Log.trace('NodeBot', err);
         }
     }
 
@@ -79,7 +79,7 @@
      */
     function registerPlugin(name) {
         Log.log('NodeBot', 'Registering %s plugin.', name);
-        require(Util.format('./plugin/%s/%s', name, name));
+        require(Util.format('./Plugin/%s/%s', name, name));
     }
 
     /**
@@ -93,7 +93,9 @@
 
         if (plugins.length > 0) {
             for (var i in plugins) {
-                registerPlugin(plugins[i]);
+                if (plugins.hasOwnProperty(i)) {
+                    registerPlugin(plugins[i]);
+                }
             }
         }
     }

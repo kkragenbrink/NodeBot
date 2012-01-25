@@ -6,8 +6,8 @@
  *    \  /\  /| |  | | |_| | | |_| | | |  __/ |_
  *     \/  \/ |_|  |_|\__|_| |_(_)_| |_|\___|\__|
  *
- * @created     19th January 2012
- * @edited      21st January 2012
+ * @created     24th January 2012
+ * @edited      24th January 2012
  * @package     NodeBot
  *
  * Copyright (C) 2012 Kevin Kragenbrink <kevin@writh.net>
@@ -32,41 +32,26 @@
  */
 
 /**
- * A central class for logging.
- *
- * This class formats all log entries in a useful format, as well as handles
- * the formatting of logstrings using Util.format().
+ * A plugin to allow players to meet other players with ease.
  *
  * @author      Kevin Kragenbrink <kevin@writh.net>
- * @version     0.1.1
- * @subpackage  Lib
+ * @version     0.1.0
+ * @subpackage  Plugin
+ * @plugin      Jobs
  * @singleton
  */
 module.exports = (function() {
-    function Log(type) {
-        var name                        = type;
+    var Route                           = require('../../Lib/Route');
 
-        if (!(name in console)) {
-            type                        = 'log';
-        }
+    var routes                          = {};
+    routes.create                       = new Route();
+    routes.create.path                  = /jobs\/create/i;
+    routes.create.contexts = {
+        mud                             : / ([a-z0-9\-_]{16})=([a-z0-9\-_ ]{64})\/(\w\W)+/igm,
+    };
+    routes.create.handler               = handleCreate;
 
-        return function() {
-            var Util                    = require('./Util');
-            var args                    = Array.prototype.slice.call( arguments, 0 );
-            var date                    = (new Date).getTime();
-            var caller                  = args.shift();
-            var message                 = Util.format.apply(Util, args);
-                message                 = Util.format('%s [%s:%s] %s', date, caller, name, message);
+    function handleCreate(data, caller, context) {
 
-            console[type].call(console, message);
-        }
     }
-
-    this.debug                          = new Log('debug');
-    this.error                          = new Log('error');
-    this.log                            = new Log('log');
-    this.warn                           = new Log('warn');
-    this.trace                          = new Log('trace');
-
-    return this;
 })();

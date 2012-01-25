@@ -17,4 +17,4 @@ output:
     prefix                  : '\[%s\]'
     tail                    : '[repeat(=, 78)]'
 
-plugins                     : []
+plugins                     : [Jobs]
