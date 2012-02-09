@@ -44,12 +44,10 @@
 (function() {
     process.versions.nodebot            = '0.1.2';
     var COMPONENT                       = 'NodeBot';
-    var Config;                         // The lib/Config module.
-    var Log;                            // The libLog module.
+    var Config                          = require('./Lib/Config');
+    var Log                             = require('./Lib/Log');
     var Util                            = require('./Lib/Util');
 
-    // Establishes the Log module.
-    Log                                 = require('./Lib/Log');
     Log.log(COMPONENT, 'NodeBot %s starting up.', process.versions.nodebot);
 
     // Handle various process-specific events.
@@ -57,7 +55,6 @@
     process.on('uncaughtException', exception);
 
     // Handle configuration file loading.
-    Config                              = require('./Lib/Config');
     Config.on('load', registerPlugins);
     Config.load('NodeBot');
 

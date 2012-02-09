@@ -6,7 +6,7 @@
  *    \  /\  /| |  | | |_| | | |_| | | |  __/ |_
  *     \/  \/ |_|  |_|\__|_| |_(_)_| |_|\___|\__|
  *
- * @created     24th January 2012
+ * @created     8th February 2012
  * @edited      8th February 2012
  * @package     NodeBot
  *
@@ -32,22 +32,36 @@
  */
 
 /**
- * A plugin to allow players to meet other players with ease.
+ * Establishes routes and handlers for the Jobs plugin.
  *
  * @author      Kevin Kragenbrink <kevin@writh.net>
- * @version     0.3.0
+ * @version     0.1.0
  * @subpackage  Plugin
  * @plugin      Jobs
  * @singleton
  */
 module.exports = (function() {
-    var Dispatcher                      = require('../../Lib/Dispatcher');
-    var routes                          = require('./Routes.js');
+    var Route                           = require('../../Lib/Route');
+    var routes                          = {};
 
-    /*for (var i in routes) {
-        if (routes.hasOwnProperty(i)) {
-            Dispatcher.register(routes[i]);
-        }
-    }*/
-    console.log(routes);
+    /**
+     * Creates a new Job.
+     *
+     * @route   jobs/create {bucket}={subject}/{body}
+     */
+    routes.create                       = new Route();
+    routes.create.path                  = /jobs\/create/i;
+    routes.create.contexts = {
+        mud                             : / ([a-z0-9\-_]{16})=([a-z0-9\-_ ]{64})\/(\w\W)+/igm
+    };
+    routes.create.handler               = require('./Routes/Create').run;
+
+    routes.comment                      = new Route();
+    routes.comment.path                 = /jobs\/comment/i;
+    routes.comment.contexts = {
+        mud                             : / (\d+)=(\w\W)+/igm
+    };
+    routes.comment.handler              = require('./Routes/Comment').run;
+
+    return routes;
 })();
