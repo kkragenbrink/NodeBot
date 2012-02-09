@@ -44,10 +44,9 @@ module.exports = (function() {
     var Dispatcher                      = require('../../Lib/Dispatcher');
     var routes                          = require('./Routes.js');
 
-    /*for (var i in routes) {
+    for (var i in routes) {
         if (routes.hasOwnProperty(i)) {
-            Dispatcher.register(routes[i]);
+            Dispatcher.addRoute(routes[i]);
         }
-    }*/
-    console.log(routes);
+    }
 })();

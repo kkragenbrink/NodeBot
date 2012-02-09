@@ -1,20 +1,18 @@
-command_prefix              : '\+'
-
-database:
-    adapter                 : 'SQLite'
+plugins                     : [Jobs]
 
 log_level                   : 'log'
 
-mud:
-    hostname                : 'localhost'
-    port                    : 2067
-    username                : 'NodeBot'
-    password                : '!'
-
-output:
-    header                  : '[center(< %s >, 78, =)]'
-    mid                     : '[repeat(-,78)]'
-    prefix                  : '\[%s\]'
-    tail                    : '[repeat(=, 78)]'
-
-plugins                     : [Jobs]
+contexts:
+  mud:
+    client:
+      hostname              : 'localhost'
+      port                  : 2067
+      username              : 'NodeBot'
+      password              : '!'
+    input:
+      prefix                : '\+'
+    output:
+      header                : '[center(< %s >, 78, =)]'
+      mid                   : '[repeat(-,78)]'
+      prefix                : '\[%s\]'
+      tail                  : '[repeat(=, 78)]'

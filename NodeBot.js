@@ -7,7 +7,7 @@
  *     \/  \/ |_|  |_|\__|_| |_(_)_| |_|\___|\__|
  *
  * @created     19th January 2012
- * @edited      24th January 2012
+ * @edited      08th February 2012
  * @package     NodeBot
  *
  * Copyright (C) 2012 Kevin Kragenbrink <kevin@writh.net>
@@ -37,7 +37,7 @@
  * Once NodeBot is established, it will load the requested user Plugins.
  *
  * @author      Kevin Kragenbrink <kevin@writh.net>
- * @version     0.1.2
+ * @version     0.2.0
  * @subpackage  Core
  * @singleton
  */
@@ -55,6 +55,7 @@
     process.on('uncaughtException', exception);
 
     // Handle configuration file loading.
+    Config.on('load', registerContexts);
     Config.on('load', registerPlugins);
     Config.load('NodeBot');
 
@@ -66,6 +67,32 @@
     function exception(err) {
         if (Log && typeof Log.error === 'function') {
             Log.trace('NodeBot', err);
+        }
+    }
+
+    /**
+     *
+     * @param {String}  context     The name of the context to register.
+     * @param {Object}  config      The configuration for the context.
+     */
+    function registerContext(context, config) {
+        Log.log('NodeBot', 'Registering %s context.', context);
+        var ctx                         = require(Util.format('./Lib/Context/%s', context));
+    }
+
+    /**
+     * Registers all contexts noted in the NodeBot configuration object.
+     *
+     * @param {Object}  config      The NodeBot configuration object.
+     * @private
+     */
+    function registerContexts(config) {
+        var contexts                    = config.contexts;
+
+        for (var i in contexts) {
+            if (contexts.hasOwnProperty(i)) {
+                registerContext(i, contexts[i]);
+            }
         }
     }
 
@@ -82,7 +109,7 @@
     /**
      * Registers all plugins noted in the NodeBot configuration object.
      *
-     * @param   config  Object      The NodeBot configuration object.
+     * @param {Object}  config      The NodeBot configuration object.
      * @private
      */
     function registerPlugins(config) {
