@@ -52,14 +52,14 @@ module.exports = (function() {
     routes.create                       = new Route();
     routes.create.path                  = /jobs\/create/i;
     routes.create.contexts = {
-        mud                             : / ([a-z0-9\-_]{16})=([a-z0-9\-_ ]{64})\/(\w\W)+/igm
+        Mud                             : / ([a-z0-9\-_]{16})=([a-z0-9\-_ ]{64})\/(\w\W)+/igm
     };
     routes.create.handler               = require('./Routes/Create').run;
 
     routes.comment                      = new Route();
     routes.comment.path                 = /jobs\/comment/i;
     routes.comment.contexts = {
-        mud                             : / (\d+)=(\w\W)+/igm
+        Mud                             : / (\d+)=(\w\W)+/igm
     };
     routes.comment.handler              = require('./Routes/Comment').run;
 

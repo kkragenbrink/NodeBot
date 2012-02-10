@@ -52,7 +52,7 @@
 
     // Handle various process-specific events.
     process.on('exit', shutdown);
-    process.on('uncaughtException', exception);
+//    process.on('uncaughtException', exception);
 
     // Handle configuration file loading.
     Config.on('load', registerContexts);
@@ -78,6 +78,7 @@
     function registerContext(context, config) {
         Log.log('NodeBot', 'Registering %s context.', context);
         var ctx                         = require(Util.format('./Lib/Context/%s', context));
+        ctx.register(config);
     }
 
     /**
