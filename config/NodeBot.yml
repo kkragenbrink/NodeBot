@@ -3,7 +3,7 @@ plugins                     : [Jobs]
 log_level                   : 'log'
 
 contexts:
-  mud:
+  Mud:
     client:
       hostname              : 'localhost'
       port                  : 2067
