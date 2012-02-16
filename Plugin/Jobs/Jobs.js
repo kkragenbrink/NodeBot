@@ -41,12 +41,62 @@
  * @singleton
  */
 module.exports = (function() {
+    var Database                        = use('/Lib/Database');
     var Dispatcher                      = use('/Lib/Dispatcher');
-    var routes                          = use('/Plugin/Jobs/Routes.js');
+    var Route                           = use('/Lib/Route');
+    var Util                            = use('/Lib/Util');
+    var routes                          = {};
+    var tables                          = {};
 
-    for (var i in routes) {
-        if (routes.hasOwnProperty(i)) {
-            Dispatcher.addRoute(routes[i]);
+    // Route Definitions
+    routes.create                       = new Route;
+    routes.create.path                  = /jobs\/create/i;
+    routes.create.contexts = {
+        Mud                             : / ([a-z0-9\-_]{16})=([a-z0-9\-_ ]{64})\/(\w\W)+/igm
+    };
+    routes.create.handler               = use('/Plugin/Jobs/Routes/Create').run;
+
+    routes.comment                      = new Route;
+    routes.comment.path                 = /jobs\/comment/i;
+    routes.comment.contexts = {
+        Mud                             : / (\d+)=(\w\W)+/igm
+    };
+    routes.comment.handler              = use('/Plugin/Jobs/Routes/Comment').run;
+
+    // Setup Routes
+    for (var route in routes) {
+        if (routes.hasOwnProperty(route)) {
+            Dispatcher.addRoute(routes[route]);
+        }
+    }
+
+    // SQLite Table Definitions
+    tables.tag                         = [];
+    tables.tag.push("id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT");
+    tables.tag.push("name VARCHAR(32)");
+
+    tables.job                         = [];
+    tables.job.push("id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT");
+    tables.job.push("title VARCHAR(255)");
+    tables.job.push("created_at INTEGER NOT NULL");
+    tables.job.push("due_at INTEGER NOT NULL");
+    tables.job.push("status VARCHAR(32)");
+
+    tables.job_tag                      = [];
+    tables.job_tag.push("job_id INTEGER NOT NULL");
+    tables.job_tag.push("tag_id INTEGER NOT NULL");
+
+    tables.comment                      = [];
+    tables.comment.push("id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT");
+    tables.comment.push("job_id INTEGER NOT NULL");
+    tables.comment.push("created_at INTEGER NOT NULL");
+    tables.comment.push("author INTEGER NOT NULL");
+    tables.comment.push("message TEXT");
+
+    // Setup Tables
+    for (var table in tables) {
+        if (tables.hasOwnProperty(table)) {
+            Database.run(Util.format("CREATE TABLE IF NOT EXISTS jobs_%s (%s)", table, tables[table].join(",")));
         }
     }
 })();

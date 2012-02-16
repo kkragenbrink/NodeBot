@@ -106,7 +106,7 @@ var Mud = use('/Lib/Context').extend(function() {
      * @param {Event}   event
      */
     function handleError(event) {
-        Log.error(error);
+        Log.error('Lib/Context/Mud', event);
     }
 
     /**
