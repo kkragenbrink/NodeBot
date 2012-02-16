@@ -7,7 +7,7 @@
  *     \/  \/ |_|  |_|\__|_| |_(_)_| |_|\___|\__|
  *
  * @created     25th January 2012
- * @edited      9th January 2012
+ * @edited      14th February 2012
  * @package     NodeBot
  *
  * Copyright (C) 2012 Kevin Kragenbrink <kevin@writh.net>
@@ -70,6 +70,10 @@ var Mud = require('../Context').extend(function() {
         // Connect.
         Log.log('Lib/Context/Mud', 'Connecting to %s', Config.client.name);
         Socket.connect(Config.client.port, Config.client.hostname);
+    }
+
+    function dispatch(instruction) {
+        console.log(instruction);
     }
 
     function handleClose(event) {
@@ -152,9 +156,7 @@ var Mud = require('../Context').extend(function() {
 
         for (var i in instructions) {
             if (instructions.hasOwnProperty(i)) {
-                var instruction         = instructions[i];
-                    instruction.context = this;
-                Dispatcher.dispatch(instruction);
+                dispatch(instructions[i]);
             }
         }
     }

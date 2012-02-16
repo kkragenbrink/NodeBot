@@ -70,34 +70,34 @@ module.exports = (function() {
             contexts.push(context);
         }
         else {
-        throw new TypeError('Attempt to register invalid context.');
-    }
+            throw new TypeError('Attempt to register invalid context.');
+        }
 
-};
+    };
 
-/**
- * Registers a route with an appropriate handler method.
- *
- * @param   {Route}     args[0]     The Route to be registered
- * @throws TypeError
- * @example
- *  var Dispatcher = require('./lib/Dispatcher');
- *  Dispatcher.register( /job\/create/, {
- *      mud : / (\w+)\/(\w+)=(\w+)/,
- *      web : {
- *          bucket : /(\w+)/,
- *          title : /(\w+)/,
- *          body : /(\w+)/
- *      }
- *   }, self.create );
- */
-this.addRoute = function() {
-    var args                        = Array.prototype.slice.call(arguments, 0);
+    /**
+     * Registers a route with an appropriate handler method.
+     *
+     * @param   {Route}     args[0]     The Route to be registered
+     * @throws TypeError
+     * @example
+     *  var Dispatcher = require('./lib/Dispatcher');
+     *  Dispatcher.register( /job\/create/, {
+     *      mud : / (\w+)\/(\w+)=(\w+)/,
+     *      web : {
+     *          bucket : /(\w+)/,
+     *          title : /(\w+)/,
+     *          body : /(\w+)/
+     *      }
+     *   }, self.create );
+     */
+    this.addRoute = function() {
+        var args                        = Array.prototype.slice.call(arguments, 0);
 
-    if (args[0] !== undefined && args[0] instanceof Route) {
-        Log.log('Lib/Dispatcher', 'Discovered route:', args[0].toString());
-        routes.push(args[0]);
-    }
+        if (args[0] !== undefined && args[0] instanceof Route) {
+            Log.log('Lib/Dispatcher', 'Discovered route:', args[0].toString());
+            routes.push(args[0]);
+        }
         else if (args[0] !== undefined) {
             Log.log('Lib/Dispatcher', 'Creating new Route to register.');
             routes.push(new Route(args));
@@ -108,8 +108,6 @@ this.addRoute = function() {
     };
 
     this.dispatch = function(instruction) {
-        console.log(instruction);
-        // TODO: Stub
     };
 
     return this;
