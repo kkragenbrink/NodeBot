@@ -41,8 +41,8 @@
  * @singleton
  */
 module.exports = (function() {
-    var Dispatcher                      = require('../../Lib/Dispatcher');
-    var routes                          = require('./Routes.js');
+    var Dispatcher                      = use('/Lib/Dispatcher');
+    var routes                          = use('/Plugin/Jobs/Routes.js');
 
     for (var i in routes) {
         if (routes.hasOwnProperty(i)) {

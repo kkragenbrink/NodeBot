@@ -51,7 +51,7 @@ module.exports = (function() {
         }
 
         return function() {
-            var Util                    = require('./Util');
+            var Util                    = use('/Lib/Util');
             var args                    = Array.prototype.slice.call( arguments, 0 );
             var date                    = (new Date).getTime();
             var caller                  = args.shift();

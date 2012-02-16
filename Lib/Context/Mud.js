@@ -42,13 +42,13 @@
  * @singleton
  * @lends       Mud
  */
-var Mud = require('../Context').extend(function() {
+var Mud = use('/Lib/Context').extend(function() {
     var Config;                         // The context configuration object.
-    var Dispatcher                      = require('../Dispatcher');
-    var Log                             = require('../Log');
-    var Net                             = require('net');
+    var Dispatcher                      = use('/Lib/Dispatcher');
+    var Log                             = use('/Lib/Log');
+    var Net                             = use('net');
     var Socket;                         // The connection to the MUD.
-    var Util                            = require('../Util');
+    var Util                            = use('/Lib/Util');
 
     var buffer                          = null;
     var bufferTime                      = 0;

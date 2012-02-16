@@ -32,6 +32,23 @@
  */
 
 /**
+ * Sets up global 'use' function.
+ *
+ * This function wraps around require() so that modules do not have to be aware
+ * of their own depth when requiring other features.
+ *
+ * @param   {String}    node        The name or path to the required node.
+ * @return  {Object}
+ */
+var path                                = process.cwd();
+global.use = function(node) {
+    if (node.match(/^\//))
+        return require(path + node);
+    else
+        return require(node);
+};
+
+/**
  * This class instantiates NodeBot as a Singleton.
  *
  * Once NodeBot is established, it will load the requested user Plugins.
@@ -44,9 +61,9 @@
 (function() {
     process.versions.nodebot            = '0.1.2';
     var COMPONENT                       = 'NodeBot';
-    var Config                          = require('./Lib/Config');
-    var Log                             = require('./Lib/Log');
-    var Util                            = require('./Lib/Util');
+    var Config                          = use('/Lib/Config');
+    var Log                             = use('/Lib/Log');
+    var Util                            = use('/Lib/Util');
 
     Log.log(COMPONENT, 'NodeBot %s starting up.', process.versions.nodebot);
 
@@ -77,7 +94,7 @@
      */
     function registerContext(context, config) {
         Log.log('NodeBot', 'Registering %s context.', context);
-        var ctx                         = require(Util.format('./Lib/Context/%s', context));
+        var ctx                         = use(Util.format('/Lib/Context/%s', context));
         ctx.register(config);
     }
 
@@ -104,7 +121,7 @@
      */
     function registerPlugin(name) {
         Log.log('NodeBot', 'Registering %s plugin.', name);
-        require(Util.format('./Plugin/%s/%s', name, name));
+        use(Util.format('/Plugin/%s/%s', name, name));
     }
 
     /**

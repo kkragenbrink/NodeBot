@@ -58,10 +58,10 @@
  * @requires    Route
  */
 module.exports = (function() {
-    var Context                         = require('./Context');
-    var Log                             = require('./Log');
-    var Route                           = require('./Route');
-    var Util                            = require('./Util');
+    var Context                         = use('/Lib/Context');
+    var Log                             = use('/Lib/Log');
+    var Route                           = use('/Lib/Route');
+    var Util                            = use('/Lib/Util');
     var contexts                        = [];
     var routes                          = [];
 
@@ -81,7 +81,7 @@ module.exports = (function() {
      * @param   {Route}     args[0]     The Route to be registered
      * @throws TypeError
      * @example
-     *  var Dispatcher = require('./lib/Dispatcher');
+     *  var Dispatcher = use('/Lib/Dispatcher');
      *  Dispatcher.register( /job\/create/, {
      *      mud : / (\w+)\/(\w+)=(\w+)/,
      *      web : {

@@ -44,7 +44,7 @@
  *
  * TODO:DOCUMENT
  */
-var Context = require('./Class').create(function() {
+var Context = use('/Lib/Class').create(function() {
     /**
      * An error object used to force class abstraction.
      * @var {Error}
@@ -62,7 +62,7 @@ var Context = require('./Class').create(function() {
             throw error;
         }
 
-        Dispatcher                      = require('./Dispatcher');
+        Dispatcher                      = use('/Lib/Dispatcher');
         Dispatcher.addContext(this);
     };
 

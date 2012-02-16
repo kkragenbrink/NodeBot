@@ -41,7 +41,7 @@
  * @singleton
  */
 module.exports = (function() {
-    var Route                           = require('../../Lib/Route');
+    var Route                           = use('/Lib/Route');
     var routes                          = {};
 
     /**
@@ -54,14 +54,14 @@ module.exports = (function() {
     routes.create.contexts = {
         Mud                             : / ([a-z0-9\-_]{16})=([a-z0-9\-_ ]{64})\/(\w\W)+/igm
     };
-    routes.create.handler               = require('./Routes/Create').run;
+    routes.create.handler               = use('/Plugin/Jobs/Routes/Create').run;
 
     routes.comment                      = new Route();
     routes.comment.path                 = /jobs\/comment/i;
     routes.comment.contexts = {
         Mud                             : / (\d+)=(\w\W)+/igm
     };
-    routes.comment.handler              = require('./Routes/Comment').run;
+    routes.comment.handler              = use('/Plugin/Jobs/Routes/Comment').run;
 
     return routes;
 })();

@@ -44,14 +44,14 @@
  * @singleton
  */
 module.exports = (function() {
-    var Cache                           = require('./Cache');
+    var Cache                           = use('/Lib/Cache');
     var CacheSubject                    = 'Config.%s';
     var Config                          = function() {}; // the Configuration object.
-    var Events                          = require('events');
-    var fs                              = require('fs');
-    var jsyaml                          = require('js-yaml');
-    var Log                             = require('./Log');
-    var Util                            = require('./Util');
+    var Events                          = use('events');
+    var fs                              = use('fs');
+    var jsyaml                          = use('js-yaml');
+    var Log                             = use('/Lib/Log');
+    var Util                            = use('/Lib/Util');
 
     Util.inherits(Config, Events.EventEmitter);
 

@@ -40,7 +40,7 @@ var initializing                        = false;
  * @param   {function}      fn          The class definition.
  * @return  ClassFactory
  * @example
- *  var Foo = require('./Class').create(function() {
+ *  var Foo = use('/Lib/Class').create(function() {
  *      this.constructor = function() {
  *          console.log('This is a constructor');
  *      };

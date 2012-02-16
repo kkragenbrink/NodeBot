@@ -40,8 +40,8 @@
  * @singleton
  */
 module.exports = (function() {
-    var Util                            = require('util');
-    var Log                             = require('./Log');
+    var Util                            = use('util');
+    var Log                             = use('/Lib/Log');
 
     Util.inArray = function(needle, haystack) {
         var found                       = false; // Whether the needle has been found.

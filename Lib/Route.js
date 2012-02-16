@@ -43,9 +43,9 @@
  *      class can be used to its full potential.
  * @lends       Route.prototype
  */
-var Route = require('./Class').create(function() {
-    var Context                         = require('./Context');
-    var Util                            = require('./Util');
+var Route = use('/Lib/Class').create(function() {
+    var Context                         = use('/Lib/Context');
+    var Util                            = use('/Lib/Util');
 
     // TODO:2012-01-25:Document this feature.
     var access                          = null;
@@ -167,8 +167,7 @@ var Route = require('./Class').create(function() {
         for (var i in contexts) {
             if (contexts.hasOwnProperty(i)) {
                 var ContextName         = i.charAt(0).toUpperCase() + i.substring(1,i.length).toLowerCase();
-                var ContextPath         = Util.format('./Context/%s', ContextName);
-                var context             = require(ContextPath);
+                var context             = use(Util.format('/Lib/Context/%s', ContextName));
 
                 if (!(context instanceof Context) || !context.validateDataPoints(contexts[i])) {
                     throw new TypeError("Invalid contexts.");
@@ -216,7 +215,7 @@ var Route = require('./Class').create(function() {
      * @param   contexts
      * @param   access
      * @example
-     *      var Route       = require('./Route');
+     *      var Route       = use('/Lib/Route');
      *
      *      // With route and handler after construction.
      *      var a           = new Route();
