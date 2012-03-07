@@ -1,0 +1,139 @@
+title NodeBot Command Flow
+
+Mud->MudContext: data
+activate MudContext
+
+MudContext->MudContext: receive
+activate MudContext
+deactivate MudContext
+
+MudContext->Dispatcher: dispatch
+deactivate MudContext
+activate Dispatcher
+
+Dispatcher->Dispatcher: validate
+activate Dispatcher
+deactivate Dispatcher
+
+opt Invalid Data
+Dispatcher-->MudContext: send(failure)
+deactivate Dispatcher
+activate MudContext
+
+MudContext->MudContext: translate
+activate MudContext
+deactivate MudContext
+
+MudContext-->Mud: send
+deactivate MudContext
+end
+
+activate Dispatcher
+
+loop Authorization Chain
+Dispatcher->[Authorization Plugin]: authorize
+activate [Authorization Plugin]
+
+[Authorization Plugin]-->Dispatcher: authorization
+deactivate [Authorization Plugin]
+end
+
+opt Not Authorized
+Dispatcher-->MudContext: send(failure)
+deactivate Dispatcher
+activate MudContext
+
+MudContext->MudContext: translate
+activate MudContext
+deactivate MudContext
+
+MudContext-->Mud: send
+deactivate MudContext
+end
+
+activate Dispatcher
+
+Dispatcher->[Plugin]: handle
+deactivate Dispatcher
+activate [Plugin]
+
+note right of Dispatcher
+  This portion of the process might benefit
+  from workers, if they can be brought up
+  quickly.
+
+  Dispatching and Sending should not be
+  handled by individual workers.
+end note
+
+[Plugin]->[Plugin]: process
+activate [Plugin]
+deactivate [Plugin]
+
+loop Requires Data
+[Plugin]-->MudContext: send(request)
+deactivate [Plugin]
+activate MudContext
+
+MudContext->MudContext: translate
+activate MudContext
+deactivate MudContext
+
+MudContext-->Mud: send
+deactivate MudContext
+activate Mud
+
+Mud->Mud: process
+activate Mud
+deactivate Mud
+
+Mud->MudContext: data
+deactivate Mud
+activate MudContext
+
+MudContext->MudContext: receive
+activate MudContext
+deactivate MudContext
+
+MudContext->Dispatcher: dispatch
+deactivate MudContext
+activate Dispatcher
+
+Dispatcher->Dispatcher: validate
+activate Dispatcher
+deactivate Dispatcher
+
+opt Invalid Data
+Dispatcher-->MudContext: send(failure)
+deactivate Dispatcher
+activate MudContext
+
+MudContext->MudContext: translate
+activate MudContext
+deactivate MudContext
+
+MudContext-->Mud: send
+deactivate MudContext
+end
+
+activate Dispatcher
+
+Dispatcher->[Plugin]: handle
+deactivate Dispatcher
+activate [Plugin]
+
+[Plugin]->[Plugin]: process
+activate [Plugin]
+deactivate [Plugin]
+end
+
+[Plugin]-->MudContext: send(results)
+deactivate [Plugin]
+activate MudContext
+
+MudContext->MudContext: translate
+activate MudContext
+deactivate MudContext
+
+MudContext-->Mud: send
+deactivate MudContext
