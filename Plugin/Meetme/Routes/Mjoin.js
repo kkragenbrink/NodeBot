@@ -34,13 +34,13 @@
 var Route                               = use('/Lib/Route');
 
 /**
- * Manages the meetme route.
+ * Manages the mjoin route.
  *
  * Usage:
- *   meetme <player>
+ *   mjoin <player>
  *
  * @author      Kevin Kragenbrink <kevin@writh.net>
- * @version     0.1.1
+ * @version     0.1.0
  * @subpackage  Plugin
  * @plugin      Meetme
  * @singleton
@@ -55,7 +55,7 @@ var Meetme = Route.extend(function() {
      * Sets up the route.
      */
     this.constructor = function() {
-        this.path                       = /meetme/i;
+        this.path                       = /mjoin/i;
         this.contexts = {
             Mud                         : /([A-z0-9\-_]{1,64})/i
         };
@@ -86,7 +86,20 @@ var Meetme = Route.extend(function() {
 
     function handleComplete() {
         this.data._end                  = (new Date()).getTime();
-        Log.log('Plugin/Meetme/meetme', 'Handled request in %s seconds.', (this.data._end - this.data._start)/1000);
+        Log.log('Plugin/Meetme/mjoin', 'Handled request in %s seconds.', (this.data._end - this.data._start)/1000);
+    }
+
+    function handleLocation(instruction) {
+        var ancestor                    = ProcessManager.getProcess(this.ancestor);
+        var location                    = instruction.loc;
+        var requester                   = ancestor.data.requester;
+
+        if (ancestor.data.context.isTrue(location)) {
+            ancestor.data.context.teleport(requester, location);
+        }
+        else {
+            ancestor.data.context.emit(requester, Util.format(ancestor.data.context.prefix('mjoin') + ' %s is not in a valid location.', ancestor.data.target));
+        }
     }
 
     function handleValidation(instruction) {
@@ -98,21 +111,27 @@ var Meetme = Route.extend(function() {
         if (ancestor.data.context.isTrue(uid)) {
             // Valid target
 
-            var pending                 = Cache.get('Meetme.pending.' + uid) || {};
+            var pending                     = Cache.get('Meetme.pending.' + requester) || {};
+            console.log(pending);
+            if (typeof pending[uid] !== 'undefined') {
+                // Requestor has an outstanding request.
+                delete pending[uid]; // TODO: This should clear the timer first.
+                Cache.set('Meetme.pending.' + requester, pending);
 
-            if (typeof pending[requester] === 'undefined') {
-                // Requestor doesn't have an outstanding request.
-                pending[requester]      = (new Date()).getTime();// TODO: This should be a timer.
-                Cache.set('Meetme.pending.' + uid, pending);
-                ancestor.data.context.emit(requester, ancestor.data.context.prefix('meetme') + ' You send your request to meet.');
-                ancestor.data.context.emit(uid, Util.format(ancestor.data.context.prefix('meetme') + ' %s would like to meet.\n\tTo join them, type +mjoin %s.\n\tTo summon them, type +msummon %s.\n\tTo ignore them, type +mignore %s.', name, name, name, name));
+                ancestor.data.uid           = uid;
+                var locate                  = ancestor.spawn(handleLocation);
+
+                ancestor.data.context.processInstructionSet(locate.pid, [
+                    ancestor.data.context.getInstruction_location(uid)
+                ]);
             }
             else {
-                ancestor.data.context.emit(requester, ancestor.data.context.prefix('meetme') + ' You have an outstanding request to meet that person.');
+                ancestor.data.context.emit(requester, ancestor.data.context.prefix('mjoin') + ' You do not have an outstanding request to meet that person.');
             }
+
         }
         else {
-            ancestor.data.context.emit(requester, Util.format(ancestor.data.context.prefix('meetme') + ' %s is not a valid target.', ancestor.data.target));
+            ancestor.data.context.emit(requester, Util.format(ancestor.data.context.prefix('mjoin') + ' %s is not a valid target.', ancestor.data.target));
         }
     }
 });

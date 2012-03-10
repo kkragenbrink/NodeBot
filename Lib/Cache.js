@@ -7,7 +7,7 @@
  *     \/  \/ |_|  |_|\__|_| |_(_)_| |_|\___|\__|
  *
  * @created     20th January 2012
- * @edited      20th January 2012
+ * @edited      9th March 2012
  * @package     NodeBot
  *
  * Copyright (C) 2012 Kevin Kragenbrink <kevin@writh.net>
@@ -35,12 +35,16 @@
  * A singleton to cache reusable data.
  *
  * @author      Kevin Kragenbrink <kevin@writh.net>
- * @version     0.1.0
+ * @version     0.2.0
  * @subpackage  Lib
  * @singleton
  */
 module.exports = (function() {
     var data                            = {};
+
+    this.delete = function(key) {
+        delete data[key];
+    };
 
     /**
      * Gets a key from the cache.

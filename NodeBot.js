@@ -42,8 +42,9 @@ require('./lib/Use');
  * @subpackage  Core
  * @singleton
  */
+
 (function() {
-    process.versions.nodebot            = '0.1.2';
+    process.versions.nodebot            = '0.2.0';
     var COMPONENT                       = 'NodeBot';
     var Config                          = use('/Lib/Config');
     var Log                             = use('/Lib/Log');

@@ -30,7 +30,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-
+var Class                               = use('/Lib/Class');
 /**
  * A plugin to allow players to meet other players with ease.
  *
@@ -40,7 +40,12 @@
  * @plugin      Meetme
  * @singleton
  */
-module.exports = (function() {
-    var Dispatcher                      = use('/Lib/Dispatcher');
-    Dispatcher.addRoutes('/Plugin/Meetme/Routes/')
-})();
+var Meetme = Class.create(function() {
+    this.constructor = function() {
+        var Dispatcher                      = use('/Lib/Dispatcher');
+        Dispatcher.addRoutes('/Plugin/Meetme/Routes/');
+    };
+
+    this.pending                        = [];
+});
+module.exports                          = new Meetme;

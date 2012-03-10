@@ -39,7 +39,7 @@
  * This context handles routes connecting to MUD endpoints.
  *
  * @author      Kevin Kragenbrink <kevin@writh.net>
- * @version     0.3.0
+ * @version     0.5.0
  * @subpackage  Lib/Context
  * @singleton
  * @lends       Mud
@@ -244,6 +244,10 @@ var Mud = use('/Lib/Context').extend(function() {
         Socket.write(data.replace(/\n/g, '%r').replace(/\t/g, '%t') + '\n');
     };
 
+    this.teleport = function(subject, target) {
+        send(Util.format('@teleport %s=%s', subject, target));
+    };
+
     /**
      * Ensures that the context-specific data variables are valid for the context.
      * @param {Object}  dataPoints  The data points to be validated.
@@ -251,6 +255,10 @@ var Mud = use('/Lib/Context').extend(function() {
      */
     this.validateDataPoints = function(dataPoints) {
         return (dataPoints instanceof RegExp);
+    };
+
+    this.getInstruction_location = function(data) {
+        return Util.format('loc:[loc(%s)]', data);
     };
 
     this.getInstruction_name = function(data) {
@@ -270,3 +278,4 @@ var Mud = use('/Lib/Context').extend(function() {
 
 module.exports                          = (new Mud);
 // TODO: Tweak NodeBot to store the instance so that multiple MUDs could be connected to at once by a single NodeBot.
+// TODO: Reorganize the methods so that they are sorted by classification.

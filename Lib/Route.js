@@ -77,6 +77,7 @@ var Route = use('/Lib/Class').create(function() {
 
     /**
      * Getter for the Contexts parameter.
+
      * @return
      */
     this.__defineGetter__('contexts', function() { return contexts; });
@@ -170,6 +171,7 @@ var Route = use('/Lib/Class').create(function() {
                 var context             = use(Util.format('/Lib/Context/%s', ContextName));
 
                 if (!(context instanceof Context) || !context.validateDataPoints(contexts[i])) {
+                    console.log(contexts);
                     throw new TypeError("Invalid contexts.");
                 }
             }
