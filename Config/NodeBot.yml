@@ -1,12 +1,14 @@
-plugins                     : [Jobs]
+plugins:
+  - meetme
+
 log_level                   : debug
 
 contexts:
   Mud:
     client:
-      name                  : 'NodeBox'
-      hostname              : 'localhost'
-      port                  : 2067
+      name                  : 'SandBox'
+      hostname              : 'writh.net'
+      port                  : 1619
       username              : 'NodeBot'
       password              : '!'
       type                  : mush

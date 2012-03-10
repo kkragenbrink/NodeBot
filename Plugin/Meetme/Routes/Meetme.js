@@ -6,7 +6,7 @@
  *    \  /\  /| |  | | |_| | | |_| | | |  __/ |_
  *     \/  \/ |_|  |_|\__|_| |_(_)_| |_|\___|\__|
  *
- * @created     20th January 2012
+ * @created     9th March 2012
  * @edited      9th March 2012
  * @package     NodeBot
  *
@@ -31,8 +31,13 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+var Route                               = use('/Lib/Route');
+
 /**
- * A plugin to allow players to meet other players with ease.
+ * Manages the +meetme route.
+ *
+ * Usage:
+ *   +meetme <player>
  *
  * @author      Kevin Kragenbrink <kevin@writh.net>
  * @version     0.1.0
@@ -40,8 +45,18 @@
  * @plugin      Meetme
  * @singleton
  */
-module.exports = (function() {
-    var Dispatcher                      = use('/Lib/Dispatcher');
-    var Util                            = use('/Lib/Util');
-    Dispatcher.addRoutes('/Plugin/Meetme/Routes/')
-})();
+var Meetme = Route.extend(function() {
+
+    this.constructor = function() {
+        this.path                       = /meetme/i;
+        this.contexts = {
+            Mud                         : /([A-z0-9\-_]{20})/i
+        };
+        this.handler                    = this.run;
+    };
+
+    this.run = function() {
+        console.log('here');
+    };
+});
+module.exports                          = new Meetme;

@@ -30,23 +30,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-
-/**
- * Sets up global 'use' function.
- *
- * This function wraps around require() so that modules do not have to be aware
- * of their own depth when requiring other features.
- *
- * @param   {String}    node        The name or path to the required node.
- * @return  {Object}
- */
-var path                                = process.cwd();
-global.use = function(node) {
-    if (node.match(/^\//))
-        return require(path + node);
-    else
-        return require(node);
-};
+require('./lib/Use');
 
 /**
  * This class instantiates NodeBot as a Singleton.

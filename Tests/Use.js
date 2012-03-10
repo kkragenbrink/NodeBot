@@ -6,8 +6,8 @@
  *    \  /\  /| |  | | |_| | | |_| | | |  __/ |_
  *     \/  \/ |_|  |_|\__|_| |_(_)_| |_|\___|\__|
  *
- * @created     20th January 2012
- * @edited      9th March 2012
+ * @created     7th March 2012
+ * @edited      7th March 2012
  * @package     NodeBot
  *
  * Copyright (C) 2012 Kevin Kragenbrink <kevin@writh.net>
@@ -32,16 +32,27 @@
  */
 
 /**
- * A plugin to allow players to meet other players with ease.
+ * Sets up global 'use' function.
  *
- * @author      Kevin Kragenbrink <kevin@writh.net>
- * @version     0.1.0
- * @subpackage  Plugin
- * @plugin      Meetme
- * @singleton
+ * This function wraps around require() so that modules do not have to be aware
+ * of their own depth when requiring other features.
+ *
+ * @param   {String}    node        The name or path to the required node.
+ * @return  {Object}
  */
-module.exports = (function() {
-    var Dispatcher                      = use('/Lib/Dispatcher');
-    var Util                            = use('/Lib/Util');
-    Dispatcher.addRoutes('/Plugin/Meetme/Routes/')
-})();
+var Path                                = require('path');
+var path                                = Path.resolve('./');
+var cache                               = {};
+module.exports = global.use = function(node) {
+    if (typeof cache[node] === 'string') {
+        return require(cache[node]);
+    }
+    else if (node.match(/^\//)) {
+        cache[node]                     = path + node;
+        return require(cache[node]);
+    }
+    else {
+        cache[node]                     = node;
+        return require(node);
+    }
+};

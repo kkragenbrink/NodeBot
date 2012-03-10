@@ -7,7 +7,7 @@
  *     \/  \/ |_|  |_|\__|_| |_(_)_| |_|\___|\__|
  *
  * @created     24th January 2012
- * @edited      25th January 2012
+ * @edited      9th March 2012
  * @package     NodeBot
  *
  * Copyright (C) 2012 Kevin Kragenbrink <kevin@writh.net>
@@ -51,7 +51,7 @@
  * options.
  *
  * @author      Kevin Kragenbrink <kevin@writh.net>
- * @version     0.1.0
+ * @version     0.2.0
  * @subpackage  Lib
  * @singleton
  * @lends       Dispatcher
@@ -59,11 +59,18 @@
  */
 module.exports = (function() {
     var Context                         = use('/Lib/Context');
+    var FileSystem                      = use('fs');
     var Log                             = use('/Lib/Log');
+    var Path                            = use('path');
     var Route                           = use('/Lib/Route');
     var Util                            = use('/Lib/Util');
+    var Synchronizer                    = use('/Lib/Synchronizer');
+
+    var authentication                  = new Synchronizer();
     var contexts                        = [];
     var routes                          = [];
+
+    this.addAuthenticationProvider = function() {};
 
     this.addContext = function(context) {
         if (context instanceof Context) {
@@ -72,7 +79,6 @@ module.exports = (function() {
         else {
             throw new TypeError('Attempt to register invalid context.');
         }
-
     };
 
     /**
@@ -107,8 +113,27 @@ module.exports = (function() {
         }
     };
 
-    this.dispatch = function(instruction) {
+    /**
+     * Finds routes in a directory and registers them.
+     *
+     * Attempts to require every file in the passed in directory. If that
+     * file's modules.exports contains a valid Route, it will be included;
+     * otherwise the file will be ignored.
+     *
+     * @param   {String}    path
+     */
+    this.addRoutes = function(path) {
+        path                            = Path.join(process.cwd(), path);
+        var files                       = FileSystem.readdirSync(path);
+        for (var i = 0; i < files.length; i++) {
+            var route                   = use(path + '/' + files[i]);
+            if (route instanceof Route) {
+                this.addRoute(route);
+            }
+        }
     };
+
+    this.dispatch = function(instruction) {};
 
     return this;
 })();
