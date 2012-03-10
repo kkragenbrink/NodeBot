@@ -7,7 +7,7 @@
  *     \/  \/ |_|  |_|\__|_| |_(_)_| |_|\___|\__|
  *
  * @created     25th January 2012
- * @edited      14th February 2012
+ * @edited      9th March 2012
  * @package     NodeBot
  *
  * Copyright (C) 2012 Kevin Kragenbrink <kevin@writh.net>
@@ -37,7 +37,7 @@
  * This context handles routes connecting to MUD endpoints.
  *
  * @author      Kevin Kragenbrink <kevin@writh.net>
- * @version     0.2.0
+ * @version     0.2.1
  * @subpackage  Lib/Context
  * @singleton
  * @lends       Mud
@@ -53,6 +53,7 @@ var Mud = use('/Lib/Context').extend(function() {
     var buffer                          = null;
     var bufferTime                      = 0;
     var connected                       = false;
+    var self                            = this;
 
     /**
      * Sets up event handlers, then connects to the MUD.
@@ -73,7 +74,10 @@ var Mud = use('/Lib/Context').extend(function() {
     }
 
     function dispatch(instruction) {
-        console.log(instruction);
+        instruction.context             = self;
+        instruction.contextName         = 'Mud';
+
+        Dispatcher.dispatch(instruction);
     }
 
     function handleClose(event) {
@@ -110,7 +114,7 @@ var Mud = use('/Lib/Context').extend(function() {
     }
 
     /**
-     * Translates incoming data into a valid packet and forwards it to the Dispatcher.
+     * Translates incoming data into a valid packet and forwards it to the Dispatcher.\
      * @param {String}      data    Incoming data from the MUD.
      */
     function handleRequest(data) {
@@ -176,7 +180,7 @@ var Mud = use('/Lib/Context').extend(function() {
                 send("@wipe me");
                 send("@set me=SAFE");
                 send('&TOJSON me=%{[trim(trim([iter(lnum(0,9), ifelse(cand(strlen(v(itext(0))),strmatch(v(itext(0)),*:*)), "[before(v(itext(0)), :)]":"[edit(edit(after(v(itext(0)), :), ", %\\"), %r, %\\n)]"%,, ))]),r,%,)]%}');
-                send('&COMMAND me=$' + Config.input.prefix + '([^\\s]+)\\s?(.*)?:think ifelse(gt(conn(%!),-1),u(TOJSON,type:command,requester:%#,route:%1,data:%2),pemit(%#,NodeBot is offline.))');
+                send('&COMMAND me=$' + Config.input.prefix + '([^\\s]+)\\s?(.*)?:think ifelse(gt(conn(%!),-1),u(TOJSON,type:command,requester:%#,path:%1,data:%2),pemit(%#,NodeBot is offline.))');
                 send('@set me/COMMAND=REGEX');
 
                 break;
@@ -184,10 +188,13 @@ var Mud = use('/Lib/Context').extend(function() {
         }
     }
 
-    /**
-     *
-     * @param config
-     */
+    this.emit = function(target, message) {
+        send(Util.format('@pemit %s=%s', target, message));
+    };
+
+    this.handleRouteFail = function(instruction) {
+        this.emit(instruction.requester, Util.format(Config.output.prefix + ' %s', Config.input.prefix + instruction.path, 'Command not found.'));
+    };
 
     /**
      * Registers the context with the dispatcher, then connects to the MUD.

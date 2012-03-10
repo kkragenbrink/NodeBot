@@ -133,7 +133,43 @@ module.exports = (function() {
         }
     };
 
-    this.dispatch = function(instruction) {};
+    /**
+     * Matches an instruction to a route and calls the route's handler.
+     *
+     * If a route cannot be found, it forwards the instruction to the
+     * onRouteFail method.
+     *
+     * @param   {Object}    instruction
+     */
+    // TODO: Add authentication. See Docs/Sequences/CommandFlow.png.
+    this.dispatch = function(instruction) {
+        if (instruction.type === 'command') {
+            var route                   = this.findRoute(instruction.path);
+            if (route instanceof Route) {
+                route.handler.call(route,instruction);
+            }
+            else {
+                instruction.context.handleRouteFail(instruction);
+            }
+        }
+    };
+
+    /**
+     * Attempts to match a path to a registered route.
+     *
+     * @param   {String}    path
+     * @return  {Route|Null}
+     */
+    this.findRoute = function(path) {
+        var route                       = null;
+        for (var i = 0; i < routes.length; i++) {
+            if (routes[i].path.test(path)) {
+                route                   = routes[i];
+            }
+        }
+
+        return route;
+    };
 
     return this;
 })();

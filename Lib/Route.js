@@ -7,7 +7,7 @@
  *     \/  \/ |_|  |_|\__|_| |_(_)_| |_|\___|\__|
  *
  * @created     25th January 2012
- * @edited      08th February 2012
+ * @edited      9th March 2012
  * @package     NodeBot
  *
  * Copyright (C) 2012 Kevin Kragenbrink <kevin@writh.net>
@@ -35,7 +35,7 @@
  * A Route class to track individual routes.
  *
  * @author      Kevin Kragenbrink <kevin@writh.net>
- * @version     0.2.1
+ * @version     0.2.2
  * @subpackage  Lib
  * @todo
  *  - Access Groups are only nebulously defined.  They are extremely important
@@ -224,9 +224,8 @@ var Route = use('/Lib/Class').create(function() {
      *
      *      // With route and handler in constructor.
      *      var b           = new Route(/b/, this.handleB);
-     * @constructs
      */
-    {
+    this.constructor = function() {
         // If we got arguments during construction, set the appropriate variables
         var args                        = Array.prototype.slice.call(arguments, 0);
 
@@ -238,7 +237,7 @@ var Route = use('/Lib/Class').create(function() {
         if (args[1] !== undefined) { this.handler = args[1]; }
         if (args[2] !== undefined) { this.contexts = args[2]; }
         if (args[3] !== undefined) { this.access = args[3]; }
-    }
+    };
 
     return this;
 });

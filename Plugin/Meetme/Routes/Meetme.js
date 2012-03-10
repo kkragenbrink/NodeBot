@@ -47,6 +47,9 @@ var Route                               = use('/Lib/Route');
  */
 var Meetme = Route.extend(function() {
 
+    /**
+     * Sets up the route.
+     */
     this.constructor = function() {
         this.path                       = /meetme/i;
         this.contexts = {
@@ -55,8 +58,6 @@ var Meetme = Route.extend(function() {
         this.handler                    = this.run;
     };
 
-    this.run = function() {
-        console.log('here');
-    };
+    this.run = function(instruction) {};
 });
 module.exports                          = new Meetme;
