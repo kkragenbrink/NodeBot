@@ -67,5 +67,12 @@ var Context = use('/Lib/Class').create(function() {
     };
 
     this.validateDataPoints = function() { throw error; };
+
+    /**
+     * Calls the remote context to validate a user identity.
+     * @param   {Integer}   pid
+     * @param   {String}    data
+     */
+    this.validateUser = function(pid, data) { throw error; };
 });
 module.exports                          = Context;

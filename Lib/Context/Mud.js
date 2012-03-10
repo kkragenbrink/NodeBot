@@ -31,13 +31,15 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+// TODO: Message queuing.
+
 /**
  * The MUD connection context.
  *
  * This context handles routes connecting to MUD endpoints.
  *
  * @author      Kevin Kragenbrink <kevin@writh.net>
- * @version     0.2.1
+ * @version     0.2.2
  * @subpackage  Lib/Context
  * @singleton
  * @lends       Mud
@@ -182,6 +184,7 @@ var Mud = use('/Lib/Context').extend(function() {
                 send('&TOJSON me=%{[trim(trim([iter(lnum(0,9), ifelse(cand(strlen(v(itext(0))),strmatch(v(itext(0)),*:*)), "[before(v(itext(0)), :)]":"[edit(edit(after(v(itext(0)), :), ", %\\"), %r, %\\n)]"%,, ))]),r,%,)]%}');
                 send('&COMMAND me=$' + Config.input.prefix + '([^\\s]+)\\s?(.*)?:think ifelse(gt(conn(%!),-1),u(TOJSON,type:command,requester:%#,path:%1,data:%2),pemit(%#,NodeBot is offline.))');
                 send('@set me/COMMAND=REGEX');
+                send('@lock/page me==me');
 
                 break;
             }
@@ -190,6 +193,20 @@ var Mud = use('/Lib/Context').extend(function() {
 
     this.emit = function(target, message) {
         send(Util.format('@pemit %s=%s', target, message));
+    };
+
+    this.isTrue = function(string) {
+        var re                          = false;
+        switch (true) {
+            case /^\d+$/.test(string):
+                re                      = (string !== '0');
+                break;
+            case /^#\d+/.test(string):
+                re                      = true;
+                break;
+        }
+
+        return re;
     };
 
     this.handleRouteFail = function(instruction) {
@@ -211,6 +228,10 @@ var Mud = use('/Lib/Context').extend(function() {
         connect();
     };
 
+    this.request = function(pid, string) {
+        send(Util.format('think u(TOJSON,type:process,pid:%d,data:[%s])', pid, string));
+    };
+
     var send = this.send = function(data) {
         Socket.write(data + '\n');
     };
@@ -222,6 +243,16 @@ var Mud = use('/Lib/Context').extend(function() {
      */
     this.validateDataPoints = function(dataPoints) {
         return (dataPoints instanceof RegExp);
+    };
+
+    /**
+     * Attempts a pmatch on the data.
+     *
+     * @param   {Integer}   pid
+     * @param   {String}    data
+     */
+    this.validateUser = function(pid, data) {
+        this.request(pid, Util.format('pmatch(%s)', data));
     };
 });
 

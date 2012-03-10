@@ -31,32 +31,34 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-var Log                             = use('/Lib/Log');
-var Process                         = use('/Lib/Process');
+var Class                           = use('/Lib/Class');
 
 /**
  * A singleton to manage processes.
  *
  * @author      Kevin Kragenbrink <kevin@writh.net>
- * @version     0.1.0
+ * @version     0.1.1
  * @subpackage  Lib
  * @singleton
  */
-var ProcessManager = (function() {
-    var maxPid                          = Math.pow(2, 32) - 1;
-    var pid                             = 0;
+var ProcessManager = Class.create(function() {
+    var Log                             = use('/Lib/Log');
+    var Process                         = use('/Lib/Process');
+
+    var maxPid                          = Math.pow(2, 32);
+    var pid                             = 1;
     var processes                       = {};
 
     /**
      * Creates a new process and returns the pid.
      *
-     * @param   {Object}    data
      * @param   {Function}  callback
+     * @param   {Object}    [data]
      * @return  {Process}
      */
-    this.createProcess = function(data, callback) {
+    this.createProcess = function(callback, data) {
         var pid                         = getPid();
-        processes[pid]                  = new Process(pid, data, callback);
+        processes[pid]                  = new Process(pid, callback, data);
 
         return processes[pid];
     };
@@ -80,7 +82,7 @@ var ProcessManager = (function() {
      */
     function getPid() {
         if (pid === maxPid) {
-            pid                         = 0;
+            pid                         = 1;
         }
 
         var p                           = pid++;
@@ -105,5 +107,5 @@ var ProcessManager = (function() {
         Log.warn('Lib/ProcessManager', 'Attempted to get an invalid process:' + pid);
         return undefined;
     };
-})();
+});
 module.exports                          = new ProcessManager;

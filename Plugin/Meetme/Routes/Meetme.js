@@ -31,6 +31,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+var Log                                 = use('/Lib/Log');
 var ProcessManager                      = use('/Lib/ProcessManager');
 var Route                               = use('/Lib/Route');
 
@@ -54,7 +55,7 @@ var Meetme = Route.extend(function() {
     this.constructor = function() {
         this.path                       = /meetme/i;
         this.contexts = {
-            Mud                         : /([A-z0-9\-_]{20})/i
+            Mud                         : /([A-z0-9\-_]{1,20})/i
         };
         this.handler                    = this.run;
     };
@@ -72,10 +73,24 @@ var Meetme = Route.extend(function() {
             _end                        : null
         };
 
-        var proc                        = ProcessManager.createProcess(data, handleComplete);
-        var validate                    = proc.spawn({}, handleValidation);
-
+        var proc                        = ProcessManager.createProcess(handleComplete, data);
+        var validate                    = proc.spawn(handleValidation);
         data.mud.validateUser(validate.pid, data.target);
     };
+
+    function handleComplete() {
+        this.data._end                  = (new Date()).getTime();
+        Log.log('Plugin/Meetme/meetme', 'Handled request in %s seconds.', (this.data._end - this.data._start)/1000);
+    }
+
+    function handleValidation(dbref) {
+        var ancestor                    = ProcessManager.getProcess(this.ancestor);
+        if (ancestor.data.mud.isTrue(dbref)) {
+            console.log("Pass");
+        }
+        else {
+            console.log("Fail");
+        }
+    }
 });
 module.exports                          = new Meetme;

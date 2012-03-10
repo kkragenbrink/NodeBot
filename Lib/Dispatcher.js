@@ -31,6 +31,8 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+var Class                               = use('/Lib/Class');
+
 /**
  * A dispatcher to manage routes.
  *
@@ -51,20 +53,20 @@
  * options.
  *
  * @author      Kevin Kragenbrink <kevin@writh.net>
- * @version     0.2.1
+ * @version     0.3.0
  * @subpackage  Lib
  * @singleton
- * @lends       Dispatcher
- * @requires    Route
  */
-module.exports = (function() {
+var Dispatcher = Class.create(function() {
     var Context                         = use('/Lib/Context');
     var FileSystem                      = use('fs');
     var Log                             = use('/Lib/Log');
     var Path                            = use('path');
+    var Process                         = use('/Lib/Process');
+    var ProcessManager                  = use('/Lib/ProcessManager');
     var Route                           = use('/Lib/Route');
-    var Util                            = use('/Lib/Util');
     var Synchronizer                    = use('/Lib/Synchronizer');
+    var Util                            = use('/Lib/Util');
 
     var authentication                  = new Synchronizer();
     var contexts                        = [];
@@ -89,8 +91,8 @@ module.exports = (function() {
      * @example
      *  var Dispatcher = use('/Lib/Dispatcher');
      *  Dispatcher.register( /job\/create/, {
-     *      mud : / (\w+)\/(\w+)=(\w+)/,
-     *      web : {
+     *      Mud : / (\w+)\/(\w+)=(\w+)/,
+     *      Web : {
      *          bucket : /(\w+)/,
      *          title : /(\w+)/,
      *          body : /(\w+)/
@@ -146,12 +148,24 @@ module.exports = (function() {
         if (instruction.type === 'command') {
             var route                   = this.findRoute(instruction);
             if (route instanceof Route) {
-                instruction.arguments   = route.contexts[instruction.context].exec(instruction.data);
+                instruction.arguments   = route.contexts[instruction.contextName].exec(instruction.data);
                 route.handler.call(route, instruction);
             }
             else {
                 instruction.context.handleRouteFail(instruction);
             }
+        }
+        else if(instruction.type === 'process') {
+            var proc                    = ProcessManager.getProcess(instruction.pid);
+            if (proc instanceof Process) {
+                proc.trigger(instruction.data);
+            }
+            else {
+                Log.warn('lib/Dispatcher', 'Received invalid process pid:', instruction.pid);
+            }
+        }
+        else {
+            Log.warn('lib/Dispatcher', 'Received invalid instruction:', instruction);
         }
     };
 
@@ -183,5 +197,5 @@ module.exports = (function() {
         return route;
     };
 
-    return this;
-})();
+});
+module.exports                          = new Dispatcher;

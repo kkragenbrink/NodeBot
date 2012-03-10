@@ -32,30 +32,32 @@
  */
 
 var Class                               = use('/Lib/Class');
-var ProcessManager                      = use('/Lib/ProcessManager');
-var Util                                = use('/Lib/Util');
 
 /**
  * Manages data across an asynchronous, disconnected process.
  *
  * @author      Kevin Kragenbrink <kevin@writh.net>
- * @version     0.1.0
+ * @version     0.2.0
  * @subpackage  Lib
  */
 var Process = Class.create(function() {
-    var callback;
-    var children;
-    var data;
-    var parent;
-    var pid;
+    var Log                                 = use('/Lib/Log');
+    var ProcessManager                      = use('/Lib/ProcessManager');
+    var Util                                = use('/Lib/Util');
+
+    var ancestor                            = null;
+    var callback                            = null;
+    var children                            = null;
+    var data                                = null;
+    var pid                                 = null;
 
     /**
      * Creates the process and assigns its values..
      * @param   {Integer}   pid
-     * @param   {Object}    data
      * @param   {Function}  callback
+     * @param   {Mixed}     [data]
      */
-    this.constructor = function(pid, data, callback) {
+    this.constructor = function(pid, callback, data) {
         this.callback                   = callback;
         this.children                   = [];
         this.data                       = data;
@@ -73,10 +75,26 @@ var Process = Class.create(function() {
      * @param   {Function}  c
      */
     this.__defineSetter__('callback', function(c) {
-        if (!(callback instanceof Function)) {
+        if (!(c instanceof Function)) {
             throw new TypeError('Callback is not a function.');
         }
         callback                        = c;
+    });
+
+    /**
+     * Getter for process ancestor.
+     */
+    this.__defineGetter__('ancestor', function() { return ancestor; });
+
+    /**
+     * Setter for process ancestor.
+     * @param   {Number}    p
+     */
+    this.__defineSetter__('ancestor', function(a) {
+        if (typeof a !== 'number') {
+            throw new TypeError('Ancestor is not a valid process.');
+        }
+        ancestor                        = a;
     });
 
     /**
@@ -102,28 +120,10 @@ var Process = Class.create(function() {
 
     /**
      * Setter for the process data.
-     * @param   {Object}    d
+     * @param   {Mixed}     d
      */
     this.__defineSetter__('data', function(d) {
-        if(!(d instanceof Object)) {
-            throw new TypeError('Data is not an object.');
-        }
         data                            = d;
-    });
-
-    /**
-     * Getter for process parent.
-     */
-    this.__defineGetter__('parent', function() { return parent; });
-
-    /**
-     * Setter for process parent.
-     * @param   {Number}    p
-     */
-    this.__defineSetter__('parent', function(p) {
-        if (typeof p !== 'Number') {
-            throw new TypeError('Parent is not a valid process.');
-        }
     });
 
     /**
@@ -136,7 +136,7 @@ var Process = Class.create(function() {
      * @param   {Integer}   p
      */
     this.__defineSetter__('pid', function(p) {
-        if (typeof p !== 'Number') {
+        if (typeof p !== 'number') {
             throw new TypeError('PID is not a number.');
         }
         pid                             = p;
@@ -154,22 +154,21 @@ var Process = Class.create(function() {
         else {
             throw new TypeError('Attempted to add a non-process as a child.');
         }
-        return this;
     };
 
     /**
      * Destroys this process and all of its children.
      *
-     * Also deregisters the process from its parent, if needed.
+     * Also deregisters the process from its ancestor, if needed.
      */
     this.destroy = function() {
+        if (this.ancestor !== null) {
+            ProcessManager.getProcess(this.ancestor).removeChild(pid);
+        }
+
         for (var i = 0; i < this.children.length; i++) {
             var child                   = this.children[i];
             ProcessManager.destroyProcess(child);
-        }
-
-        if (this.parent !== null) {
-            ProcessManager.getProcess(this.parent).removeChild(pid);
         }
     };
 
@@ -183,26 +182,30 @@ var Process = Class.create(function() {
         if (ProcessManager.getProcess(pid) instanceof Process && idx > -1) {
             this.children.splice(idx, 1);
         }
-        return this;
     };
 
     /**
      * Calls the process manager to spawn a child process.
-     * @param   {Object}    data
      * @param   {Function}  callback
+     * @param   {Object}    [data]
      * @return  {Integer}
      */
-    this.spawn = function(data, callback) {
-        var proc                        = ProcessManager.createProcess(data, callback);
-        this.addChild(proc);
-        proc.parent                     = this.pid;
+    this.spawn = function(callback, data) {
+        var proc                        = ProcessManager.createProcess(callback, data);
 
-        return pid;
+        this.addChild(proc);
+        proc.ancestor                   = this.pid;
+
+        return proc;
     };
 
     /**
      * Triggers the process callback, then destroys the process.
-     * @param   {Array[]}   data
+     *
+     * If the process has a parent and all other child processes have
+     * completed, the parent will be triggered.
+     *
+     * @param   {Array}     [data]
      */
     this.trigger = function(data) {
         if (typeof data !== 'array') {
@@ -211,6 +214,13 @@ var Process = Class.create(function() {
 
         this.callback.apply(this, data);
         this.destroy();
+
+        if (this.ancestor !== null) {
+            var proc                        = ProcessManager.getProcess(this.ancestor);
+            if (proc.children.length === 0) {
+                proc.trigger();
+            }
+        }
     };
 });
 module.exports                          = Process;
