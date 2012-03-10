@@ -58,6 +58,12 @@ var Meetme = Route.extend(function() {
         this.handler                    = this.run;
     };
 
-    this.run = function(instruction) {};
+    this.run = function(instruction) {
+        var requester                   = instruction.requester;
+        var target                      = instruction.arguments[0];
+        var mud                         = instruction.context;
+
+        // TODO: Register a process, validate target.
+    };
 });
 module.exports                          = new Meetme;

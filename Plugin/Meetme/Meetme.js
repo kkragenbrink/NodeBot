@@ -42,6 +42,5 @@
  */
 module.exports = (function() {
     var Dispatcher                      = use('/Lib/Dispatcher');
-    var Util                            = use('/Lib/Util');
     Dispatcher.addRoutes('/Plugin/Meetme/Routes/')
 })();

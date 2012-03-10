@@ -51,7 +51,7 @@
  * options.
  *
  * @author      Kevin Kragenbrink <kevin@writh.net>
- * @version     0.2.0
+ * @version     0.2.1
  * @subpackage  Lib
  * @singleton
  * @lends       Dispatcher
@@ -144,9 +144,10 @@ module.exports = (function() {
     // TODO: Add authentication. See Docs/Sequences/CommandFlow.png.
     this.dispatch = function(instruction) {
         if (instruction.type === 'command') {
-            var route                   = this.findRoute(instruction.path);
+            var route                   = this.findRoute(instruction);
             if (route instanceof Route) {
-                route.handler.call(route,instruction);
+                instruction.arguments   = route.contexts[instruction.context].exec(instruction.data);
+                route.handler.call(route, instruction);
             }
             else {
                 instruction.context.handleRouteFail(instruction);
@@ -157,14 +158,25 @@ module.exports = (function() {
     /**
      * Attempts to match a path to a registered route.
      *
-     * @param   {String}    path
+     * @param   {Object}    instruction
      * @return  {Route|Null}
      */
-    this.findRoute = function(path) {
+    this.findRoute = function(instruction) {
         var route                       = null;
+        var context                     = instruction.contextName;
+
         for (var i = 0; i < routes.length; i++) {
-            if (routes[i].path.test(path)) {
-                route                   = routes[i];
+            if (routes[i].path.test(instruction.path)) {
+                // Possible match.
+                if (routes[i].contexts[context]) {
+                    // Context has path.
+                    var data            = routes[i].contexts[context];
+                    if (data.test(instruction.data)) {
+                        // Valid path.
+                        route           = routes[i];
+                        break;
+                    }
+                }
             }
         }
 
