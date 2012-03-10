@@ -39,7 +39,7 @@
  * This context handles routes connecting to MUD endpoints.
  *
  * @author      Kevin Kragenbrink <kevin@writh.net>
- * @version     0.2.2
+ * @version     0.3.0
  * @subpackage  Lib/Context
  * @singleton
  * @lends       Mud
@@ -210,7 +210,15 @@ var Mud = use('/Lib/Context').extend(function() {
     };
 
     this.handleRouteFail = function(instruction) {
-        this.emit(instruction.requester, Util.format(Config.output.prefix + ' %s', Config.input.prefix + instruction.path, 'Command not found.'));
+        this.emit(instruction.requester, this.prefix(instruction.path) + ' Command not found.');
+    };
+
+    this.prefix = function(data) {
+        return Util.format(Config.output.prefix, Config.input.prefix + data);
+    };
+
+    this.processInstructionSet = function(pid, instructions) {
+        this.request(pid, instructions.join(','));
     };
 
     /**
@@ -229,11 +237,11 @@ var Mud = use('/Lib/Context').extend(function() {
     };
 
     this.request = function(pid, string) {
-        send(Util.format('think u(TOJSON,type:process,pid:%d,data:[%s])', pid, string));
+        send(Util.format('think u(TOJSON,type:process,pid:%d,%s)', pid, string));
     };
 
     var send = this.send = function(data) {
-        Socket.write(data + '\n');
+        Socket.write(data.replace(/\n/g, '%r').replace(/\t/g, '%t') + '\n');
     };
 
     /**
@@ -245,14 +253,18 @@ var Mud = use('/Lib/Context').extend(function() {
         return (dataPoints instanceof RegExp);
     };
 
+    this.getInstruction_name = function(data) {
+        return Util.format('name:[name(%s)]', data);
+    };
+
     /**
-     * Attempts a pmatch on the data.
+     * Returns the instruction for pmatch.
      *
      * @param   {Integer}   pid
      * @param   {String}    data
      */
-    this.validateUser = function(pid, data) {
-        this.request(pid, Util.format('pmatch(%s)', data));
+    this.getInstruction_validateUser = function(data) {
+        return Util.format('user:[pmatch(%s)]', data);
     };
 });
 

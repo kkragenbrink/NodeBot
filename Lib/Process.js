@@ -205,14 +205,10 @@ var Process = Class.create(function() {
      * If the process has a parent and all other child processes have
      * completed, the parent will be triggered.
      *
-     * @param   {Array}     [data]
+     * @param   {Object}    instruction
      */
-    this.trigger = function(data) {
-        if (typeof data !== 'array') {
-            data                        = [data];
-        }
-
-        this.callback.apply(this, data);
+    this.trigger = function(instruction) {
+        this.callback.call(this, instruction);
         this.destroy();
 
         if (this.ancestor !== null) {

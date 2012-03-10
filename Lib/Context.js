@@ -37,7 +37,7 @@
  * This class is extended by all Contexts to provide a common interface.
  *
  * @author      Kevin Kragenbrink <kevin@writh.net>
- * @version     0.1.0
+ * @version     0.2.0
  * @subpackage  Lib
  * @singleton
  * @lends       Context.prototype
@@ -57,6 +57,8 @@ var Context = use('/Lib/Class').create(function() {
      */
     var Dispatcher;
 
+    this.processInstructionSet = function(pid, instructions) {};
+
     this.register = function() {
         if (!(this.parent instanceof Context)) {
             throw error;
@@ -67,12 +69,5 @@ var Context = use('/Lib/Class').create(function() {
     };
 
     this.validateDataPoints = function() { throw error; };
-
-    /**
-     * Calls the remote context to validate a user identity.
-     * @param   {Integer}   pid
-     * @param   {String}    data
-     */
-    this.validateUser = function(pid, data) { throw error; };
 });
 module.exports                          = Context;

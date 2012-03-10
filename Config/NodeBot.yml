@@ -6,9 +6,9 @@ log_level                   : debug
 contexts:
   Mud:
     client:
-      name                  : 'SandBox'
-      hostname              : 'writh.net'
-      port                  : 1619
+      name                  : 'NodeMUX'
+      hostname              : 'localhost'
+      port                  : 2165
       username              : 'NodeBot'
       password              : '!'
       type                  : mush

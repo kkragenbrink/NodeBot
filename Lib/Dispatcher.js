@@ -158,7 +158,7 @@ var Dispatcher = Class.create(function() {
         else if(instruction.type === 'process') {
             var proc                    = ProcessManager.getProcess(instruction.pid);
             if (proc instanceof Process) {
-                proc.trigger(instruction.data);
+                proc.trigger(instruction);
             }
             else {
                 Log.warn('lib/Dispatcher', 'Received invalid process pid:', instruction.pid);

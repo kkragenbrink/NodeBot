@@ -31,8 +31,6 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-var Log                                 = use('/Lib/Log');
-var ProcessManager                      = use('/Lib/ProcessManager');
 var Route                               = use('/Lib/Route');
 
 /**
@@ -48,6 +46,10 @@ var Route                               = use('/Lib/Route');
  * @singleton
  */
 var Meetme = Route.extend(function() {
+    var Log                                 = use('/Lib/Log');
+    var ProcessManager                      = use('/Lib/ProcessManager');
+    var Util                                = use('/lib/Util');
+    var Meetme                              = this;
 
     /**
      * Sets up the route.
@@ -58,6 +60,7 @@ var Meetme = Route.extend(function() {
             Mud                         : /([A-z0-9\-_]{1,20})/i
         };
         this.handler                    = this.run;
+        this.pending                    = {};
     };
 
     /**
@@ -68,14 +71,18 @@ var Meetme = Route.extend(function() {
         var data = {
             requester                   : instruction.requester,
             target                      : instruction.arguments[1],
-            mud                         : instruction.context,
+            context                     : instruction.context,
             _start                      : (new Date()).getTime(),
             _end                        : null
         };
 
         var proc                        = ProcessManager.createProcess(handleComplete, data);
         var validate                    = proc.spawn(handleValidation);
-        data.mud.validateUser(validate.pid, data.target);
+
+        data.context.processInstructionSet(validate.pid, [
+            data.context.getInstruction_validateUser(data.target),
+            data.context.getInstruction_name(data.requester)
+        ]);
     };
 
     function handleComplete() {
@@ -83,13 +90,31 @@ var Meetme = Route.extend(function() {
         Log.log('Plugin/Meetme/meetme', 'Handled request in %s seconds.', (this.data._end - this.data._start)/1000);
     }
 
-    function handleValidation(dbref) {
+    function handleValidation(instruction) {
         var ancestor                    = ProcessManager.getProcess(this.ancestor);
-        if (ancestor.data.mud.isTrue(dbref)) {
-            console.log("Pass");
+        var uid                         = instruction.user;
+        var name                        = instruction.name;
+
+        if (ancestor.data.context.isTrue(uid)) {
+            // Valid target
+
+            if (!Util.isArray(Meetme.pending[uid])) {
+                // Target has never had a meetme.
+                Meetme.pending[uid]       = [];
+            }
+
+            if (Meetme.pending[uid].indexOf(ancestor.data.requester) === -1) {
+                // Requestor doesn't have an outstanding request.
+                Meetme.pending[uid].push(ancestor.data.requester);
+                ancestor.data.context.emit(ancestor.data.requester, ancestor.data.context.prefix('meetme') + ' You send your request to meet.');
+                ancestor.data.context.emit(uid, Util.format(ancestor.data.context.prefix('meetme') + ' %s would like to meet.\n\tTo join them, type +mjoin %s.\n\tTo summon them, type +msummon %s.\n\tTo ignore them, type +mignore %s.', name, name, name, name));
+            }
+            else {
+                ancestor.data.context.emit(ancestor.data.requester, ancestor.data.context.prefix('meetme') + ' You have an outstanding request to meet that person.');
+            }
         }
         else {
-            console.log("Fail");
+            ancestor.data.context.emit(ancestor.data.requester, Util.format(ancestor.data.context.prefix('meetme') + ' %s is not a valid target.', ancestor.data.target));
         }
     }
 });
