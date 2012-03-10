@@ -7,7 +7,7 @@
  *     \/  \/ |_|  |_|\__|_| |_(_)_| |_|\___|\__|
  *
  * @created     25th January 2012
- * @edited      9th March 2012
+ * @edited      10th March 2012
  * @package     NodeBot
  *
  * Copyright (C) 2012 Kevin Kragenbrink <kevin@writh.net>
@@ -39,7 +39,7 @@
  * This context handles routes connecting to MUD endpoints.
  *
  * @author      Kevin Kragenbrink <kevin@writh.net>
- * @version     0.5.0
+ * @version     0.5.1
  * @subpackage  Lib/Context
  * @singleton
  * @lends       Mud
@@ -56,6 +56,8 @@ var Mud = use('/Lib/Context').extend(function() {
     var bufferTime                      = 0;
     var connected                       = false;
     var self                            = this;
+
+    this.__defineGetter__('config', function() { return Config; });
 
     /**
      * Sets up event handlers, then connects to the MUD.

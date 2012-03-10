@@ -7,7 +7,7 @@
  *     \/  \/ |_|  |_|\__|_| |_(_)_| |_|\___|\__|
  *
  * @created     9th March 2012
- * @edited      9th March 2012
+ * @edited      10th March 2012
  * @package     NodeBot
  *
  * Copyright (C) 2012 Kevin Kragenbrink <kevin@writh.net>
@@ -40,7 +40,7 @@ var Route                               = use('/Lib/Route');
  *   meetme <player>
  *
  * @author      Kevin Kragenbrink <kevin@writh.net>
- * @version     0.1.1
+ * @version     0.1.2
  * @subpackage  Plugin
  * @plugin      Meetme
  * @singleton
@@ -105,7 +105,12 @@ var Meetme = Route.extend(function() {
                 pending[requester]      = (new Date()).getTime();// TODO: This should be a timer.
                 Cache.set('Meetme.pending.' + uid, pending);
                 ancestor.data.context.emit(requester, ancestor.data.context.prefix('meetme') + ' You send your request to meet.');
-                ancestor.data.context.emit(uid, Util.format(ancestor.data.context.prefix('meetme') + ' %s would like to meet.\n\tTo join them, type +mjoin %s.\n\tTo summon them, type +msummon %s.\n\tTo ignore them, type +mignore %s.', name, name, name, name));
+                var notice              = Util.format(ancestor.data.context.prefix('meetme') + ' %s would like to meet.', name);
+                    notice             += Util.format('\n\tTo join them, type %smjoin %s.', ancestor.data.context.config.input.prefix, name);
+                    notice             += Util.format('\n\tTo summon them, type %smsummon %s.', ancestor.data.context.config.input.prefix, name);
+                    notice             += Util.format('\n\tTo decline, type %smdecline %s.', ancestor.data.context.config.input.prefix, name);
+                    notice             += Util.format('\n\tTo ignore them, type %smignore %s.', ancestor.data.context.config.input.prefix, name);
+                ancestor.data.context.emit(uid, notice);
             }
             else {
                 ancestor.data.context.emit(requester, ancestor.data.context.prefix('meetme') + ' You have an outstanding request to meet that person.');
