@@ -31,6 +31,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+var ProcessManager                      = use('/Lib/ProcessManager');
 var Route                               = use('/Lib/Route');
 
 /**
@@ -58,12 +59,23 @@ var Meetme = Route.extend(function() {
         this.handler                    = this.run;
     };
 
+    /**
+     * Handles initial meetme request.
+     * @param   {Object}    instruction
+     */
     this.run = function(instruction) {
-        var requester                   = instruction.requester;
-        var target                      = instruction.arguments[0];
-        var mud                         = instruction.context;
+        var data = {
+            requester                   : instruction.requester,
+            target                      : instruction.arguments[1],
+            mud                         : instruction.context,
+            _start                      : (new Date()).getTime(),
+            _end                        : null
+        };
 
-        // TODO: Register a process, validate target.
+        var proc                        = ProcessManager.createProcess(data, handleComplete);
+        var validate                    = proc.spawn({}, handleValidation);
+
+        data.mud.validateUser(validate.pid, data.target);
     };
 });
 module.exports                          = new Meetme;

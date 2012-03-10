@@ -32,7 +32,7 @@
  */
 
 /**
- * A class to cache reusable data.
+ * A singleton to cache reusable data.
  *
  * @author      Kevin Kragenbrink <kevin@writh.net>
  * @version     0.1.0
