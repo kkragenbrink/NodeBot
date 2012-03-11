@@ -1,0 +1,21 @@
+plugins:
+  - meetme
+
+log_level                   : debug
+
+contexts:
+  Mud:
+    client:
+      name                  : 'NodeMUX'
+      hostname              : 'localhost'
+      port                  : 2165
+      username              : 'NodeBot'
+      password              : '!'
+      type                  : mush
+    input:
+      prefix                : '\+'
+    output:
+      header                : '[center(< %s >, 78, =)]'
+      mid                   : '[repeat(-,78)]'
+      prefix                : '\[%s\]'
+      tail                  : '[repeat(=, 78)]'

@@ -1,142 +1,137 @@
 /**
- * NodeBot
+ * __          __   _ _   _                  _
+ * \ \        / /  (_) | | |                | |
+ *  \ \  /\  / / __ _| |_| |__    _ __   ___| |_
+ *   \ \/  \/ / '__| | __| '_ \  | '_ \ / _ \ __|
+ *    \  /\  /| |  | | |_| | | |_| | | |  __/ |_
+ *     \/  \/ |_|  |_|\__|_| |_(_)_| |_|\___|\__|
  *
- * @author  Kevin "Loki" Kragenbrink <kevin@writh.net>
- * @updated 12 November 2011
- * @version 0.4.0
+ * @created     19th January 2012
+ * @edited      16th February 2012
+ * @package     NodeBot
+ *
+ * Copyright (C) 2012 Kevin Kragenbrink <kevin@writh.net>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS IN THE SOFTWARE.
  */
-
-// Update this configuration section with your information.
-var config = {
-    // The list of plugins you want to use.
-    plugins                 : ['Finger'],
-
-    // Output decorators.
-    output : {
-        header              : '[center(< %s >, 78, =)]',
-        mid                 : '[repeat(-, 78)]',
-        prefix              : '\\[%s\\]',
-        tail                : '[repeat(=, 78)]'
-    },
-
-    // Connection information.
-    mud : {
-        host                : 'localhost',  // The hostname of your MUSH; best if localhost
-        port                : 2067,         // The port of your MUSH
-        user                : 'NodeBot',    // The username of your bot.
-        pass                : '!'           // The password of your bot.
-    },
-
-    // The level of details you want to see in your logs. (audit, trace, debug, log, warn, or error)
-    logLevel                : 'log'
-};
-// *** STOP ***
-// Do not edit below this line.
-// *** STOP ***
+require('./lib/Use');
 
 /**
- * NodeBot Bootstrap Script
+ * This class instantiates NodeBot as a Singleton.
  *
- * Bootstraps the NodeBot and initializes its plugins for run.
- * @param config
+ * Once NodeBot is established, it will load the requested user Plugins.
+ *
+ * @author      Kevin Kragenbrink <kevin@writh.net>
+ * @version     0.2.0
+ * @subpackage  Core
+ * @singleton
  */
-var NodeBot = function( config ) {
-    var self                = this;
-    var libraries = {
-        Controller          : false,
-        Connection          : false,
-        Log                 : false,
-        Mud                 : false,
-        Process             : false,
-        ProcessManager      : false
-    };
-    var plugins             = {};
-    var version             = '0.6.0';
-    self.config             = config;
-    self.prelog             = [];
+
+(function() {
+    process.versions.nodebot            = '0.2.0';
+    var COMPONENT                       = 'NodeBot';
+    var Config                          = use('/Lib/Config');
+    var Log                             = use('/Lib/Log');
+    var Util                            = use('/Lib/Util');
+
+    Log.log(COMPONENT, 'NodeBot %s starting up.', process.versions.nodebot);
+
+    // Handle various process-specific events.
+    process.on('exit', shutdown);
+//    process.on('uncaughtException', exception);
+
+    // Handle configuration file loading.
+    Config.on('load', registerContexts);
+    Config.on('load', registerPlugins);
+    Config.load('NodeBot');
 
     /**
-     * Creates a log store until the Log class is initialized.
-     * @param type
-     */
-    function Prelog( type ) {
-        return function() {
-            var args = Array.prototype.slice.call( arguments, 0 );
-            args.unshift( type );
-            self.prelog.push( args );
-        }
-    }
-    self.debug = new Prelog( 'debug' );
-    self.error = new Prelog( 'error' );
-    self.log = new Prelog( 'log' );
-    self.warn = new Prelog( 'warn' );
-
-    /**
-     * Initializes NodeBot and instantiates all libraries and plugins.
+     * Handles uncaught exceptions.
+     * @param   err     Error       The exception to handle.
      * @private
      */
-    function init() {
-
-        self.log( 'NodeBot', "NodeBot %s starting up.", version );
-        loadLibraries();
-        loadPlugins();
-        self.Connection.connect();
-    }
-
-    /**
-     * Iterates through the libraries and initializes them.
-     * @private
-     */
-    function loadLibraries() {
-        for ( var i in libraries ) {
-            loadLibrary( i );
-        }
-        
-    }
-
-    /**
-     * Iterates through the requested plugins and initializes them.
-     * @private
-     */
-    function loadPlugins() {
-        for ( var i in self.config.plugins ) {
-            loadPlugin( self.config.plugins[i] );
+    function exception(err) {
+        if (Log && typeof Log.error === 'function') {
+            Log.trace('NodeBot', err);
         }
     }
 
     /**
-     * Registers a Library.
-     * @param Library
+     *
+     * @param {String}  context     The name of the context to register.
+     * @param {Object}  config      The configuration for the context.
+     */
+    function registerContext(context, config) {
+        Log.log('NodeBot', 'Registering %s context.', context);
+        var ctx                         = use(Util.format('/Lib/Context/%s', context));
+        ctx.register(config);
+    }
+
+    /**
+     * Registers all contexts noted in the NodeBot configuration object.
+     *
+     * @param {Object}  config      The NodeBot configuration object.
      * @private
      */
-    function loadLibrary( Library ) {
+    function registerContexts(config) {
+        var contexts                    = config.contexts;
 
-        if ( !libraries[Library] ) {
-            self[Library]                   = require( './lib/' + Library );
-
-            if ( typeof self[Library].init === 'function' ) {
-                self[Library].init( self );
+        for (var i in contexts) {
+            if (contexts.hasOwnProperty(i)) {
+                registerContext(i, contexts[i]);
             }
-
-            libraries[Library]              = true;
         }
     }
 
     /**
-     * Registers a Plugin.
-     * @param Plugin
+     * Registers a new plugin with NodeBot.
+     * @param   name    String      The plugin to register.
      * @private
      */
-    function loadPlugin( Plugin ) {
-
-        var pluginName                  = Plugin.toLowerCase();
-        plugins[pluginName]             = require( './plugins/' + Plugin + '.js' );
-        plugins[pluginName].init( self );
+    function registerPlugin(name) {
+        Log.log('NodeBot', 'Registering %s plugin.', name);
+        use(Util.format('/Plugin/%s/%s', name, name));
     }
 
-    // Go!
-    init();
-    return self;
-};
+    /**
+     * Registers all plugins noted in the NodeBot configuration object.
+     *
+     * @param {Object}  config      The NodeBot configuration object.
+     * @private
+     */
+    function registerPlugins(config) {
+        var plugins                     = config.plugins;
 
-module.exports              = new NodeBot( config );
+        if (plugins.length > 0) {
+            for (var i in plugins) {
+                if (plugins.hasOwnProperty(i)) {
+                    registerPlugin(plugins[i]);
+                }
+            }
+        }
+    }
+
+    /**
+     * Logs the shutdown event before the process completes.
+     * @private
+     */
+    function shutdown() {
+        Log.log(COMPONENT, 'NodeBot shutting down.');
+    }
+})();
