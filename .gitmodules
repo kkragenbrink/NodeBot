@@ -1,0 +1,3 @@
+[submodule "Plugin/Meetme"]
+	path = Plugin/Meetme
+	url = https://kkragenbrink@github.com/TableMUSH/NodeBot-meetme-plugin.git
