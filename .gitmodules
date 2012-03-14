@@ -4,3 +4,6 @@
 [submodule "Plugin/Registration"]
 	path = Plugin/Registration
 	url = https://github.com/TableMUSH/Nodebot-registration-plugin
+[submodule "Plugin/Dice"]
+	path = Plugin/Dice
+	url = https://github.com/TableMUSH/Nodebot-dice-plugin
