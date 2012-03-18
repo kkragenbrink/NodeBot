@@ -125,8 +125,8 @@ var Dispatcher = Class.create(function() {
      * @param   {String}    path
      */
     this.addRoutes = function(path) {
-        path                            = Path.join(process.cwd(), path);
-        var files                       = FileSystem.readdirSync(path);
+        var files                       = FileSystem.readdirSync(process.cwd() + path);
+
         for (var i = 0; i < files.length; i++) {
             var route                   = use(path + '/' + files[i]);
             if (route instanceof Route) {
