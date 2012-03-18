@@ -7,7 +7,7 @@
  *     \/  \/ |_|  |_|\__|_| |_(_)_| |_|\___|\__|
  *
  * @created     9th March 2012
- * @edited      9th March 2012
+ * @edited      18th March 2012
  * @package     NodeBot
  *
  * Copyright (C) 2012 Kevin Kragenbrink <kevin@writh.net>
@@ -37,7 +37,7 @@ var Class                               = use('/Lib/Class');
  * Manages data across an asynchronous, disconnected process.
  *
  * @author      Kevin Kragenbrink <kevin@writh.net>
- * @version     0.2.0
+ * @version     0.2.1
  * @subpackage  Lib
  */
 var Process = Class.create(function() {
@@ -205,7 +205,7 @@ var Process = Class.create(function() {
      * If the process has a parent and all other child processes have
      * completed, the parent will be triggered.
      *
-     * @param   {Object}    instruction
+     * @param   {Object}    [instruction]
      */
     this.trigger = function(instruction) {
         this.callback.call(this, instruction);
