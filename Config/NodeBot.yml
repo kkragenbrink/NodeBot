@@ -1,14 +1,15 @@
 plugins:
-  - meetme
+  - Dice
+  - Meetme
 
 log_level                   : debug
 
 contexts:
   Mud:
     client:
-      name                  : 'NodeMUX'
-      hostname              : 'localhost'
-      port                  : 2165
+      name                  : 'TableMUSH'
+      hostname              : 'mud.tablemush.org'
+      port                  : 4201
       username              : 'NodeBot'
       password              : '!'
       type                  : mush
@@ -17,5 +18,5 @@ contexts:
     output:
       header                : '[center(< %s >, 78, =)]'
       mid                   : '[repeat(-,78)]'
-      prefix                : '\[%s\]'
+      prefix                : '%ch%cx\[%cg%s%cx\]%cn'
       tail                  : '[repeat(=, 78)]'

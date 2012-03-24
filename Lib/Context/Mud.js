@@ -7,7 +7,7 @@
  *     \/  \/ |_|  |_|\__|_| |_(_)_| |_|\___|\__|
  *
  * @created     25th January 2012
- * @edited      10th March 2012
+ * @edited      19th March 2012
  * @package     NodeBot
  *
  * Copyright (C) 2012 Kevin Kragenbrink <kevin@writh.net>
@@ -39,7 +39,7 @@
  * This context handles routes connecting to MUD endpoints.
  *
  * @author      Kevin Kragenbrink <kevin@writh.net>
- * @version     0.5.1
+ * @version     0.5.2
  * @subpackage  Lib/Context
  * @singleton
  * @lends       Mud
@@ -197,6 +197,10 @@ var Mud = use('/Lib/Context').extend(function() {
         send(Util.format('@pemit %s=%s', target, message));
     };
 
+    this.oemit = function(target, message) {
+        send(Util.format('@oemit %s=%s', target, message));
+    };
+
     this.isTrue = function(string) {
         var re                          = false;
         switch (true) {
@@ -259,12 +263,24 @@ var Mud = use('/Lib/Context').extend(function() {
         return (dataPoints instanceof RegExp);
     };
 
+    this.getInstruction = function(instruction, data, inline) {
+        inline                          = (inline === true) || false;
+        return this['getInstruction_' + instruction](data, inline);
+    };
+
     this.getInstruction_location = function(data) {
         return Util.format('loc:[loc(%s)]', data);
     };
 
-    this.getInstruction_name = function(data) {
-        return Util.format('name:[name(%s)]', data);
+    /**
+     * Gets the name of the requested object.
+     *
+     * @param   {string}    data
+     * @param   {boolean}   [inline]
+     */
+    this.getInstruction_name = function(data, inline) {
+        inline                          = (inline === true) || false;
+        return Util.format('%s[name(%s)]', (inline ? '' : 'name:'), data);
     };
 
     /**

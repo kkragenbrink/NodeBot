@@ -7,7 +7,7 @@
  *     \/  \/ |_|  |_|\__|_| |_(_)_| |_|\___|\__|
  *
  * @created     21st January 2012
- * @edited      21st January 2012
+ * @edited      23rd March 2012
  * @package     NodeBot
  *
  * Copyright (C) 2012 Kevin Kragenbrink <kevin@writh.net>
@@ -35,13 +35,29 @@
  * A class for convenient utilities.
  *
  * @author      Kevin Kragenbrink <kevin@writh.net>
- * @version     0.1.0
+ * @version     0.2.0
  * @subpackage  Lib
  * @singleton
  */
 module.exports = (function() {
     var Util                            = use('util');
     var Log                             = use('/Lib/Log');
+
+    Util.extend = function() {
+        var args                        = Array.prototype.slice.call(arguments, 0);
+
+        var object                      = args.shift();
+        var extension;
+
+        while (extension = args.shift()) {
+            var properties              = Object.getOwnPropertyNames(extension);
+            properties.forEach(function (name) {
+                object[name]            = extension[name];
+            });
+        }
+
+        return object;
+    };
 
     Util.inArray = function(needle, haystack) {
         var found                       = false; // Whether the needle has been found.

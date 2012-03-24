@@ -6,7 +6,7 @@
 *    \  /\  /| |  | | |_| | | |_| | | |  __/ |_
 *     \/  \/ |_|  |_|\__|_| |_(_)_| |_|\___|\__|
 *
-* @created     14th March 2012
+* @created     23rd March 2012
 * @edited      23rd March 2012
 * @package     NodeBot
 *
@@ -32,70 +32,43 @@
 */
 var Class                               = use('/Lib/Class');
 
-var Token                               = use('/Lib/Token');
-
 /**
-* Converts a string to a series of tokens and types.
+* Generic Parser for parsing tokens.
 *
 * @author      Kevin Kragenbrink <kevin@writh.net>
-* @version     0.3.0
+* @version     0.1.0
 * @subpackage  Lib
-* @lends       Tokenizer
+* @lends       Parser
 */
-var Tokenizer = Class.create(function() {
+var Parser = Class.create(function() {
+    var Token                           = use('/Lib/Token');
 
     /**
-     * Constructs up the tokenizer.
-     * @param   {Object}    definitions     A series of named regular expressions.
+     * Constructs the Parser.
+     *
+     * During construction, the regexp for the Lexicon and the Token Types must
+     * be configured. These should not be stored in the parser's declaration.
      */
-    this.constructor = function(definitions) {
-        types                           = definitions;
-    };
+    this.constructor = function() {};
 
     /**
-     * Returns the remaining stream.
-     */
-    this.getStream = function() {
-        return stream;
-    };
-
-    /**
-     * Prepares the stream for parsing.
-     * @param input
-     */
-    this.prepare = function(input) {
-        stream                          = input;
-    };
-
-    /**
-     * Finds the next token and converts it to a token objects.
+     * Returns the token types for the parser.
      * @return  {Object}
      */
-    this.getNextToken = function() {
-        if (stream.length === 0 || stream === null) {
-            return this.EOFTOKEN;
-        }
-
-        for (var type in types) {
-            if (types.hasOwnProperty(type)) {
-                var expression          = types[type];
-                var matches             = expression.exec(stream);
-
-                if (matches) {
-                    var match           = matches[1];
-                    stream              = stream.substring(stream.indexOf(match) + match.length);
-                    return new Token(match, type);
-                }
-            }
-        }
-
-        throw new Error('Parse error.');
+    this.getTypes = function() {
+        return this.types;
     };
 
-    this.EOFTOKEN                       = new Token(null, 'EOF');
+    /**
+     * Parses tokens.
+     * @param   {Token[]}   tokens
+     */
+    this.parse = function(tokens) {};
 
-    var types;
-    var stream;
-
+    /**
+     * The token types for the parser.
+     * @var     {Object}    A series of named regexps to identify a token type.
+     */
+    this.types;
 });
-module.exports                          = Tokenizer;
+module.exports                          = Parser;
