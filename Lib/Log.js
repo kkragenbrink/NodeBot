@@ -7,7 +7,7 @@
  *     \/  \/ |_|  |_|\__|_| |_(_)_| |_|\___|\__|
  *
  * @created     19th January 2012
- * @edited      08th February 2012
+ * @edited      24th March 2012
  * @package     NodeBot
  *
  * Copyright (C) 2012 Kevin Kragenbrink <kevin@writh.net>
@@ -38,7 +38,7 @@
  * the formatting of logstrings using Util.format().
  *
  * @author      Kevin Kragenbrink <kevin@writh.net>
- * @version     0.1.2
+ * @version     0.2.0
  * @subpackage  Lib
  * @singleton
  */
@@ -56,8 +56,7 @@ module.exports = (function() {
             var date                    = (new Date).getTime();
             var caller                  = args.shift();
             var message                 = Util.format.apply(Util, args);
-//                message                 = Util.format('%s [%s:%s] %s', date, caller, name, message);
-                message                 = Util.format('%s %s', date, message);
+                message                 = Util.sprintf('%s [%5s::%20s] %s', date, name, caller, message);
 
             console[type].call(console, message);
         }

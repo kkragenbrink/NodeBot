@@ -7,7 +7,7 @@
  *     \/  \/ |_|  |_|\__|_| |_(_)_| |_|\___|\__|
  *
  * @created     25th January 2012
- * @edited      19th March 2012
+ * @edited      26th March 2012
  * @package     NodeBot
  *
  * Copyright (C) 2012 Kevin Kragenbrink <kevin@writh.net>
@@ -39,7 +39,7 @@
  * This context handles routes connecting to MUD endpoints.
  *
  * @author      Kevin Kragenbrink <kevin@writh.net>
- * @version     0.5.2
+ * @version     0.6.0
  * @subpackage  Lib/Context
  * @singleton
  * @lends       Mud
@@ -194,11 +194,11 @@ var Mud = use('/Lib/Context').extend(function() {
     }
 
     this.emit = function(target, message) {
-        send(Util.format('@pemit %s=%s', target, message));
+        send(Util.format('@pemit %s=%s', target, message.replace(/  /g, '%b%b')));
     };
 
     this.oemit = function(target, message) {
-        send(Util.format('@oemit %s=%s', target, message));
+        send(Util.format('@oemit %s=%s', target, message.replace(/  /g, '%b%b')));
     };
 
     this.isTrue = function(string) {
@@ -264,33 +264,62 @@ var Mud = use('/Lib/Context').extend(function() {
     };
 
     this.getInstruction = function(instruction, data, inline) {
-        inline                          = (inline === true) || false;
+        inline                          = (inline === true);
         return this['getInstruction_' + instruction](data, inline);
     };
 
-    this.getInstruction_location = function(data) {
-        return Util.format('loc:[loc(%s)]', data);
+    /**
+     * Gets the location of the requested object.
+     * @param   {String}    data
+     * @param   {Boolean}   [inline]
+     */
+    this.getInstruction_location = function(data, inline) {
+        inline                          = (inline === true);
+        return Util.format('%s[loc(%s)]', (inline ? '' : 'loc:'), data);
     };
 
     /**
      * Gets the name of the requested object.
      *
-     * @param   {string}    data
-     * @param   {boolean}   [inline]
+     * @param   {String}    data
+     * @param   {Boolean}   [inline]
      */
     this.getInstruction_name = function(data, inline) {
-        inline                          = (inline === true) || false;
+        inline                          = (inline === true);
         return Util.format('%s[name(%s)]', (inline ? '' : 'name:'), data);
+    };
+
+    /**
+     * Returns the instruction for string length.
+     *
+     * @param   {String}    data
+     * @param   {Boolean}   [inline]
+     */
+    this.getInstruction_length = function(data, inline) {
+        inline                          = (inline === true);
+        return Util.format('%s[strlen(%s)]', (inline ? '' : 'length:'), data);
     };
 
     /**
      * Returns the instruction for pmatch.
      *
-     * @param   {Integer}   pid
      * @param   {String}    data
+     * @param   {Boolean}   [inline]
      */
-    this.getInstruction_validateUser = function(data) {
-        return Util.format('user:[pmatch(%s)]', data);
+    this.getInstruction_validateUser = function(data, inline) {
+        inline                          = (inline === true);
+        return Util.format('%s[pmatch(%s)]', (inline ? '' : 'user:'), data);
+    };
+
+    /**
+     * Returns the instruction for whitespace.
+     *
+     * @param   {String}    data
+     * @param   {Boolean}   [inline]
+     */
+    this.getInstruction_whitespace = function(data, inline) {
+        inline                          = (inline === true);
+        return Util.format('%s[space(%s)]', (inline ? '' : 'space:'), data);
     };
 });
 
