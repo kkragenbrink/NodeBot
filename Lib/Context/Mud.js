@@ -268,6 +268,11 @@ var Mud = use('/Lib/Context').extend(function() {
         return this['getInstruction_' + instruction](data, inline);
     };
 
+    this.getInstruction_hilight = function(data, inline) {
+        inline                          = (inline === true);
+        return Util.format('%s[ansi(hw, %s)]', (inline ? '' : 'hilight:'), data);
+    };
+
     /**
      * Gets the location of the requested object.
      * @param   {String}    data

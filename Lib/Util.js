@@ -7,7 +7,7 @@
  *     \/  \/ |_|  |_|\__|_| |_(_)_| |_|\___|\__|
  *
  * @created     21st January 2012
- * @edited      24th March 2012
+ * @edited      1st April 2012
  * @package     NodeBot
  *
  * Copyright (C) 2012 Kevin Kragenbrink <kevin@writh.net>
@@ -35,13 +35,22 @@
  * A class for convenient utilities.
  *
  * @author      Kevin Kragenbrink <kevin@writh.net>
- * @version     0.4.1
+ * @version     0.5.0
  * @subpackage  Lib
  * @singleton
  */
 module.exports = (function() {
     var Util                            = use('util');
     var Log                             = use('/Lib/Log');
+
+    /**
+     * Capitalizes the first letter of a string.
+     * @param   {String}        string
+     * @return  {String}
+     */
+    Util.capitalize = function(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    };
 
     /**
      * Extends an object with any other objects, overwriting variables along the way.
