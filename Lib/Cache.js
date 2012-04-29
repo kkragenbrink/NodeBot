@@ -7,7 +7,7 @@
  *     \/  \/ |_|  |_|\__|_| |_(_)_| |_|\___|\__|
  *
  * @created     20th January 2012
- * @edited      9th March 2012
+ * @edited      28th April 2012
  * @package     NodeBot
  *
  * Copyright (C) 2012 Kevin Kragenbrink <kevin@writh.net>
@@ -42,14 +42,18 @@
 module.exports = (function() {
     var data                            = {};
 
+    /**
+     * Deletes a key from the cache.
+     * @param   {String}    key
+     */
     this.delete = function(key) {
         delete data[key];
     };
 
     /**
      * Gets a key from the cache.
-     * @param   key         String
-     * @return  mixed
+     * @param   {String}    key
+     * @return  {*}
      * TODO:2012-01-20:Provide a mechanism for recursively reading through objects.
      *                  e.g.: Cache.get('foo.bar');
      */
@@ -57,14 +61,19 @@ module.exports = (function() {
         return data[key];
     };
 
+    /**
+     * Determines whether a key exists in the cache.
+     * @param   {String}    key
+     * @return  {Boolean}
+     */
     this.has = function(key) {
         return (typeof data[key] !== 'undefined');
     };
 
     /**
      * Sets a key in the cache.
-     * @param   key         String
-     * @param   value       mixed
+     * @param   {String}    key
+     * @param   {*}         value
      */
     this.set = function(key, value) {
         if (typeof value !== 'undefined') {
