@@ -7,7 +7,7 @@
  *     \/  \/ |_|  |_|\__|_| |_(_)_| |_|\___|\__|
  *
  * @created     19th January 2012
- * @edited      18th March 2012
+ * @edited      9th May 2012
  * @package     NodeBot
  *
  * Copyright (C) 2012 Kevin Kragenbrink <kevin@writh.net>
@@ -38,13 +38,13 @@ require('./Lib/Use');
  * Once NodeBot is established, it will load the requested user Plugins.
  *
  * @author      Kevin Kragenbrink <kevin@writh.net>
- * @version     0.2.1
+ * @version     0.3.0
  * @subpackage  Core
  * @singleton
  */
 
 (function() {
-    process.versions.nodebot            = '0.2.0';
+    process.versions.nodebot            = '0.3.0';
     var COMPONENT                       = 'NodeBot';
     var Config                          = use('/Lib/Config');
     var Log                             = use('/Lib/Log');
@@ -104,9 +104,14 @@ require('./Lib/Use');
      * @param   name    String      The plugin to register.
      * @private
      */
-    function registerPlugin(name) {
+    function registerPlugin(name, config) {
         Log.log('NodeBot', 'Registering %s plugin.', name);
-        use(Util.format('/Plugin/%s/%s', name, name));
+        var plugin                      = use(Util.format('/Plugin/%s/%s', name, name));
+
+        if (typeof plugin.configure === 'function') {
+            Log.log('NodeBot', 'Configuring %s plugin.', name);
+            plugin.configure(config);
+        }
     }
 
     /**
@@ -116,13 +121,12 @@ require('./Lib/Use');
      * @private
      */
     function registerPlugins(config) {
+        Log.log('NodeBot', 'Registering plugins.');
         var plugins                     = config.plugins;
 
-        if (plugins.length > 0) {
-            for (var i in plugins) {
-                if (plugins.hasOwnProperty(i)) {
-                    registerPlugin(plugins[i]);
-                }
+        for (var i in plugins) {
+            if (plugins.hasOwnProperty(i)) {
+                registerPlugin(i, plugins[i]);
             }
         }
     }

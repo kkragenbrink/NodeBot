@@ -1,6 +1,7 @@
 plugins:
-  - Dice
-  - Meetme
+  Dice:
+    default_parser          : 'dd'
+  Meetme:
 
 log_level                   : debug
 
@@ -8,8 +9,8 @@ contexts:
   Mud:
     client:
       name                  : 'TableMUSH'
-      hostname              : 'mud.tablemush.org'
-      port                  : 4201
+      hostname              : 'tablemush.org'
+      port                  : 4202
       username              : 'NodeBot'
       password              : '!'
       type                  : mush
