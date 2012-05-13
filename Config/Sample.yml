@@ -1,6 +1,6 @@
 plugins:
   Dice:
-    default_parser          : 'dd'
+    default_parser          : dd
   Meetme:
 
 log_level                   : debug
@@ -8,14 +8,14 @@ log_level                   : debug
 contexts:
   Mud:
     client:
-      name                  : 'TableMUSH'
-      hostname              : 'tablemush.org'
+      name                  : SampleMUSH
+      hostname              : samplemush.org
       port                  : 4202
-      username              : 'NodeBot'
-      password              : '!'
+      username              : NodeBot
+      password              : !
       type                  : mush
     input:
-      prefix                : '\+'
+      prefix                : \+
     output:
       header                : '[center(< %s >, 78, =)]'
       mid                   : '[repeat(-,78)]'
