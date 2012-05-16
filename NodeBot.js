@@ -7,7 +7,7 @@
  *     \/  \/ |_|  |_|\__|_| |_(_)_| |_|\___|\__|
  *
  * @created     19th January 2012
- * @edited      9th May 2012
+ * @edited      15th May 2012
  * @package     NodeBot
  *
  * Copyright (C) 2012 Kevin Kragenbrink <kevin@writh.net>
@@ -31,6 +31,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 require('./Lib/Use');
+var Arguments                           = use('/Lib/Arguments');
 
 /**
  * This class instantiates NodeBot as a Singleton.
@@ -45,21 +46,21 @@ require('./Lib/Use');
 
 (function() {
     process.versions.nodebot            = '0.3.0';
-    var COMPONENT                       = 'NodeBot';
     var Config                          = use('/Lib/Config');
     var Log                             = use('/Lib/Log');
     var Util                            = use('/Lib/Util');
 
-    Log.log(COMPONENT, 'NodeBot %s starting up.', process.versions.nodebot);
+    Log.log('NodeBot', 'NodeBot %s starting up.', process.versions.nodebot);
 
     // Handle various process-specific events.
     process.on('exit', shutdown);
-//    process.on('uncaughtException', exception);
+    process.on('uncaughtException', exception);
 
     // Handle configuration file loading.
     Config.on('load', registerContexts);
     Config.on('load', registerPlugins);
-    Config.load('NodeBot');
+    Config.on('error', exception);
+    Config.load(getConfigurationName());
 
     /**
      * Handles uncaught exceptions.
@@ -69,6 +70,16 @@ require('./Lib/Use');
     function exception(err) {
         if (Log && typeof Log.error === 'function') {
             Log.trace('NodeBot', err);
+        }
+    }
+
+    function getConfigurationName() {
+        if (Arguments.hasArgument('config')) {
+            return Arguments.getArgument('config');
+        }
+        else {
+            Log.warn('NodeBot', 'No configuration file specified. Please use --config=<filename>');
+            return 'NodeBot';
         }
     }
 
@@ -136,6 +147,6 @@ require('./Lib/Use');
      * @private
      */
     function shutdown() {
-        Log.log(COMPONENT, 'NodeBot shutting down.');
+        Log.log('NodeBot', 'NodeBot shutting down.');
     }
 })();
