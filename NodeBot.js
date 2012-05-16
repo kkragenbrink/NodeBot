@@ -31,7 +31,6 @@
  * DEALINGS IN THE SOFTWARE.
  */
 require('./Lib/Use');
-var Arguments                           = use('/Lib/Arguments');
 
 /**
  * This class instantiates NodeBot as a Singleton.
@@ -46,11 +45,12 @@ var Arguments                           = use('/Lib/Arguments');
 
 (function() {
     process.versions.nodebot            = '0.3.0';
-    var Config                          = use('/Lib/Config');
-    var Log                             = use('/Lib/Log');
-    var Util                            = use('/Lib/Util');
 
+    var Log                             = use('/Lib/Log');
     Log.log('NodeBot', 'NodeBot %s starting up.', process.versions.nodebot);
+    var Arguments                       = use('/Lib/Arguments');
+    var Config                          = use('/Lib/Config');
+    var Util                            = use('/Lib/Util');
 
     // Handle various process-specific events.
     process.on('exit', shutdown);
