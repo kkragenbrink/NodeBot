@@ -20,8 +20,13 @@ var StaffProvider1 = Class.create(function() {
         Dispatcher.addAuthenticationProvider(authenticate);
     };
 
-    var authenticate = function(packet) {
-        return (packet.StaffProvider1 !== true || isStaff(packet.requester));
+    var authenticate = function(packet, callback) {
+        if (packet.route.StaffProvider1 === true) {
+            callback(isStaff(packet.requester));
+        }
+        else {
+            callback();
+        }
     };
 });
 
@@ -40,14 +45,13 @@ METHOD II -- ADD AUTHORIZATION BY MESSAGE
 
 Advantages:
     CommandPlugins do not need to be aware of which plugin is performing
-    their Authorization; only that they are being authorized. Moreover, the
-    pre-defined authorization options allow CommandPlugins to rely on certain
-    features being available.
+    their Authorization; only that they are being authorized.
 
 Disadvantages:
-    This method severely limits what AuthPlugins are capable of, requiring
-    them to conform to a small subset of potential authorization means. It
-    homogenizes AuthPlugins, making multiple AuthPlugins utterly meaningless.
+    This method still relies on CommandPlugins being aware of what types of authentication
+    might be available, and how they will be named (or alternatively: it requires AuthPlugins
+    to be aware of which types of authentication CommandPlugins will rely on to ensure those
+    requests will be authenticated properly).
 */
 
 var StaffProvider2 = Class.create(function() {
@@ -66,7 +70,12 @@ var StaffProvider2 = Class.create(function() {
     };
 
     var authenticate = function(packet) {
-        return (!routes[packet.path] || isStaff(packet.requester));
+        if (typeof routes[packet.route.path] !== 'undefined') {
+            callback(isStaff(packet.requester));
+        }
+        else {
+            callback();
+        }
     };
 });
 
