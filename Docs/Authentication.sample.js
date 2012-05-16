@@ -48,10 +48,11 @@ Advantages:
     their Authorization; only that they are being authorized.
 
 Disadvantages:
-    This method still relies on CommandPlugins being aware of what types of authentication
-    might be available, and how they will be named (or alternatively: it requires AuthPlugins
-    to be aware of which types of authentication CommandPlugins will rely on to ensure those
-    requests will be authenticated properly).
+    This method still relies on CommandPlugins being aware of what types 
+    of authentication might be available, and how they will be named (or 
+    alternatively: it requires AuthPlugins to be aware of which types of 
+    authentication CommandPlugins will rely on to ensure those requests 
+    will be authenticated properly).
 */
 
 var StaffProvider2 = Class.create(function() {
