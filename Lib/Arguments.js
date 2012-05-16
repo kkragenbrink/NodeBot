@@ -55,6 +55,7 @@ var Arguments = Class.create(function() {
         var arguments                   = process.argv.slice(2, process.argv.length);
         var key;
         var value;
+        var args                        = {};
         for (var a = 0; a < arguments.length; a++) {
             if (arguments[a].indexOf('=') > 0) {
                 key                     = arguments[a].substr(0, arguments[a].indexOf('='));
@@ -76,9 +77,11 @@ var Arguments = Class.create(function() {
                 key                     = key.substr(2);
             }
 
-            Log.log('Lib/Arguments', 'Setting argument "%s".', key);
-            Cache.set(Util.sprintf('Arguments.%s', key), value);
+            args[key]                   = value;
         }
+
+        Log.debug('Lib/Arguments', 'Setting arguments:', args);
+        Cache.set('Arguments', args);
     };
 
     /**

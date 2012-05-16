@@ -7,7 +7,7 @@
  *     \/  \/ |_|  |_|\__|_| |_(_)_| |_|\___|\__|
  *
  * @created     20th January 2012
- * @edited      28th April 2012
+ * @edited      15th May 2012
  * @package     NodeBot
  *
  * Copyright (C) 2012 Kevin Kragenbrink <kevin@writh.net>
@@ -31,16 +31,24 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+var Class                               = use('/Lib/Class');
+
 /**
  * A singleton to cache reusable data.
  *
  * @author      Kevin Kragenbrink <kevin@writh.net>
- * @version     0.2.0
+ * @version     0.3.0
  * @subpackage  Lib
  * @singleton
  */
-module.exports = (function() {
-    var data                            = {};
+var Cache = Class.create(function() {
+
+    /**
+     * Instantiates the data object.
+     */
+    this.constructor = function() {
+        data                            = {};
+    };
 
     /**
      * Deletes a key from the cache.
@@ -52,13 +60,38 @@ module.exports = (function() {
 
     /**
      * Gets a key from the cache.
+     *
+     * If the key is specified in object notation (e.g. foo.bar), NodeBot attempts
+     * to retrieve the specific value requested from a cached object.
+     *
      * @param   {String}    key
      * @return  {*}
-     * TODO:2012-01-20:Provide a mechanism for recursively reading through objects.
-     *                  e.g.: Cache.get('foo.bar');
      */
     this.get = function(key) {
-        return data[key];
+        return getObjectKey(key, data);
+    };
+
+    /**
+     * Recursively loops through the data to find a very specific key.
+     * @param   {String}    key
+     * @param   {Object}    data
+     * @private
+     */
+    var getObjectKey = function(key, data) {
+        if (typeof data === 'object') {
+            if (key.indexOf('.') > -1) {
+                var container           = key.substr(0, key.indexOf('.'));
+                key                     = key.substr(key.indexOf('.') + 1);
+
+                return getObjectKey(key, data[container]);
+            }
+            else {
+                return data[key];
+            }
+        }
+        else {
+            return null;
+        }
     };
 
     /**
@@ -66,8 +99,9 @@ module.exports = (function() {
      * @param   {String}    key
      * @return  {Boolean}
      */
+    // TODO: This is incredibly slow.  It needs to be made miles faster.
     this.has = function(key) {
-        return (typeof data[key] !== 'undefined');
+        return (typeof getObjectKey(key, data) !== 'undefined');
     };
 
     /**
@@ -81,5 +115,12 @@ module.exports = (function() {
         }
     };
 
-    return this;
-})();
+    /**
+     * All cached data, stored as an object.
+     * @var    {Object}
+     * @private
+     */
+    var data;
+});
+
+module.exports                              = new Cache;

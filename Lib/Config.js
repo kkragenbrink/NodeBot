@@ -45,7 +45,7 @@
  */
 module.exports = (function() {
     var Cache                           = use('/Lib/Cache');
-    var CacheSubject                    = 'Config.%s';
+    var CacheSubject                    = 'Config';
     var Config                          = function() {}; // the Configuration object.
     var Events                          = use('events');
     var fs                              = use('fs');
@@ -72,13 +72,12 @@ module.exports = (function() {
      * @emits   load([Object yaml]
      */
     Config.prototype.load = function(file, force) {
-        var cache                       = Util.format(CacheSubject, file);
         var self                        = this;
         force                           = (force === true);
 
-        if (Cache.has(cache)) {
+        if (Cache.has(CacheSubject)) {
             // No need to reload it. We've already got it.
-            this.emit('load', Cache.get(cache))
+            this.emit('load', Cache.get(CacheSubject))
         }
         else {
             Log.log('Lib/Config', 'Loading %s configuration.', file);
@@ -117,7 +116,7 @@ module.exports = (function() {
         else {
             try {
                 yaml                    = jsyaml.load(data);
-                Cache.set(Util.format(CacheSubject, file), yaml);
+                Cache.set(CacheSubject, yaml);
             }
             catch (error) {
                 message                 = Util.format(ConfigurationError.message, 'Invalid YAML syntax', file);
