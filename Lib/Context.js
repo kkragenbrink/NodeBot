@@ -57,8 +57,17 @@ var Context = use('/Lib/Class').create(function() {
      */
     var Dispatcher;
 
+    /**
+     * Translates an incoming instruction set and sends it to the context for running.
+     *
+     * @param   {Integer}   pid
+     * @param   {String[]}  instructions
+     */
     this.processInstructionSet = function(pid, instructions) {};
 
+    /**
+     * Registers the context with the dispatcher.
+     */
     this.register = function() {
         if (!(this.parent instanceof Context)) {
             throw error;

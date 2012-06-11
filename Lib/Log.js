@@ -62,6 +62,7 @@ module.exports = (function() {
         }
     }
 
+    // Create log levels
     this.debug                          = new Log('debug');
     this.error                          = new Log('error');
     this.log                            = new Log('log');

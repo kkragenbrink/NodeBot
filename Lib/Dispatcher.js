@@ -72,8 +72,19 @@ var Dispatcher = Class.create(function() {
     var contexts                        = [];
     var routes                          = [];
 
-    this.addAuthenticationProvider = function() {};
+    /**
+     * Adds an authentication function to the Dispatcher.
+     * @param   {Function}  provider
+     */
+    this.addAuthenticationProvider = function(provider) {
+        authentication.addFunction(provider, 500);
+    };
 
+    /**
+     * Adds a new context to the Dispatcher.
+     * @param   {Context}   context
+     * @throws  {TypeError}
+     */
     this.addContext = function(context) {
         if (context instanceof Context) {
             contexts.push(context);
@@ -87,7 +98,7 @@ var Dispatcher = Class.create(function() {
      * Registers a route with an appropriate handler method.
      *
      * @param   {Route}     args[0]     The Route to be registered
-     * @throws TypeError
+     * @throws  {TypeError}
      * @example
      *  var Dispatcher = use('/Lib/Dispatcher');
      *  Dispatcher.register( /job\/create/, {
@@ -148,6 +159,7 @@ var Dispatcher = Class.create(function() {
         if (instruction.type === 'command') {
             var route                   = this.findRoute(instruction);
             if (route instanceof Route) {
+                // Run the arguments through the route's context-specific arguments regex.
                 instruction.arguments   = route.contexts[instruction.contextName].exec(instruction.data);
                 route.handler.call(route, instruction);
             }

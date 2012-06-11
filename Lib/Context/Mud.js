@@ -7,7 +7,7 @@
  *     \/  \/ |_|  |_|\__|_| |_(_)_| |_|\___|\__|
  *
  * @created     25th January 2012
- * @edited      26th March 2012
+ * @edited      11th June 2012
  * @package     NodeBot
  *
  * Copyright (C) 2012 Kevin Kragenbrink <kevin@writh.net>
@@ -39,7 +39,7 @@
  * This context handles routes connecting to MUD endpoints.
  *
  * @author      Kevin Kragenbrink <kevin@writh.net>
- * @version     0.6.0
+ * @version     0.6.1
  * @subpackage  Lib/Context
  * @singleton
  * @lends       Mud
@@ -184,7 +184,7 @@ var Mud = use('/Lib/Context').extend(function() {
                 send("@wipe me");
                 send("@set me=SAFE");
                 send('&TOJSON me=%{[trim(trim([iter(lnum(0,9), ifelse(cand(strlen(v(itext(0))),strmatch(v(itext(0)),*:*)), "[before(v(itext(0)), :)]":"[edit(edit(after(v(itext(0)), :), ", %\\"), %r, %\\n)]"%,, ))]),r,%,)]%}');
-                send('&COMMAND me=$' + Config.input.prefix + '([^\\s]+)\\s?(.*)?:think ifelse(gt(conn(%!),-1),u(TOJSON,type:command,requester:%#,path:%1,data:%2),pemit(%#,NodeBot is offline.))');
+                send('&COMMAND me=$^' + Config.input.prefix + '([^\\s]+)\\s?(.*)?:think ifelse(gt(conn(%!),-1),u(TOJSON,type:command,requester:%#,path:%1,data:%2),pemit(%#,NodeBot is offline.))');
                 send('@set me/COMMAND=REGEX');
                 send('@lock/page me==me');
 

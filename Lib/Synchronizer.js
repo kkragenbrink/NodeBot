@@ -193,8 +193,9 @@ var Synchronizer = Class.create(function() {
 
     /**
      * Executes all functions added to the Synchronizer.
+     * @param   {*[]}    parameters
      */
-    this.run = function() {
+    this.run = function(parameters) {
         // Make sure we don't try to call the Synchronizer before its last run was complete.
         if (running || halted) {
             throw new Error("Synchronizer must be reset before running again.");
@@ -207,7 +208,7 @@ var Synchronizer = Class.create(function() {
             functions[i].timer          = setTimer(i);
 
             try {
-                functions[i].fn.call(this, getCallback(i));
+                functions[i].fn.call(this, getCallback(i), parameters);
             }
             catch (e) {
                 clearTimeout(functions[i].timer);
