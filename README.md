@@ -11,7 +11,10 @@ url: http://www.sqlite.org/
 url: https://github.com/nodeca/js-yaml
 install: npm install js-yaml
 
-## Modules
+### sequelize
+url: https://github.com/sdepold/sequelize
+install: npm install sequelize
+
 ### sqlite3
 url: https://github.com/developmentseed/node-sqlite3
 install: npm install sqlite3
