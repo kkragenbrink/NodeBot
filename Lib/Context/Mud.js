@@ -7,7 +7,7 @@
  *     \/  \/ |_|  |_|\__|_| |_(_)_| |_|\___|\__|
  *
  * @created     25th January 2012
- * @edited      11th June 2012
+ * @edited      13th June 2012
  * @package     NodeBot
  *
  * Copyright (C) 2012 Kevin Kragenbrink <kevin@writh.net>
@@ -58,6 +58,7 @@ var Mud = use('/Lib/Context').extend(function() {
     var self                            = this;
 
     this.__defineGetter__('config', function() { return Config; });
+    this.__defineGetter__('instructions', function() { return use('/Lib/Instructions/' + Config.client.type); });
 
     /**
      * Sets up event handlers, then connects to the MUD.
@@ -193,14 +194,6 @@ var Mud = use('/Lib/Context').extend(function() {
         }
     }
 
-    this.emit = function(target, message) {
-        send(Util.format('@pemit %s=%s', target, message.replace(/  /g, '%b%b')));
-    };
-
-    this.oemit = function(target, message) {
-        send(Util.format('@oemit %s=%s', target, message.replace(/  /g, '%b%b')));
-    };
-
     this.isTrue = function(string) {
         var re                          = false;
         switch (true) {
@@ -216,7 +209,7 @@ var Mud = use('/Lib/Context').extend(function() {
     };
 
     this.handleRouteFail = function(instruction) {
-        this.emit(instruction.requester, this.prefix(instruction.path) + ' Command not found.');
+        send(this.instructions.emitToUser(instruction.requester, this.prefix(instruction.path) + ' Command not found.'));
     };
 
     this.prefix = function(data) {
@@ -250,10 +243,6 @@ var Mud = use('/Lib/Context').extend(function() {
         Socket.write(data.replace(/\n/g, '%r').replace(/\t/g, '%t') + '\n');
     };
 
-    this.teleport = function(subject, target) {
-        send(Util.format('@teleport %s=%s', subject, target));
-    };
-
     /**
      * Ensures that the context-specific data variables are valid for the context.
      * @param {Object}  dataPoints  The data points to be validated.
@@ -261,70 +250,6 @@ var Mud = use('/Lib/Context').extend(function() {
      */
     this.validateDataPoints = function(dataPoints) {
         return (dataPoints instanceof RegExp);
-    };
-
-    this.getInstruction = function(instruction, data, inline) {
-        inline                          = (inline === true);
-        return this['getInstruction_' + instruction](data, inline);
-    };
-
-    this.getInstruction_hilight = function(data, inline) {
-        inline                          = (inline === true);
-        return Util.format('%s[ansi(hw, %s)]', (inline ? '' : 'hilight:'), data);
-    };
-
-    /**
-     * Gets the location of the requested object.
-     * @param   {String}    data
-     * @param   {Boolean}   [inline]
-     */
-    this.getInstruction_location = function(data, inline) {
-        inline                          = (inline === true);
-        return Util.format('%s[loc(%s)]', (inline ? '' : 'loc:'), data);
-    };
-
-    /**
-     * Gets the name of the requested object.
-     *
-     * @param   {String}    data
-     * @param   {Boolean}   [inline]
-     */
-    this.getInstruction_name = function(data, inline) {
-        inline                          = (inline === true);
-        return Util.format('%s[name(%s)]', (inline ? '' : 'name:'), data);
-    };
-
-    /**
-     * Returns the instruction for string length.
-     *
-     * @param   {String}    data
-     * @param   {Boolean}   [inline]
-     */
-    this.getInstruction_length = function(data, inline) {
-        inline                          = (inline === true);
-        return Util.format('%s[strlen(%s)]', (inline ? '' : 'length:'), data);
-    };
-
-    /**
-     * Returns the instruction for pmatch.
-     *
-     * @param   {String}    data
-     * @param   {Boolean}   [inline]
-     */
-    this.getInstruction_validateUser = function(data, inline) {
-        inline                          = (inline === true);
-        return Util.format('%s[pmatch(%s)]', (inline ? '' : 'user:'), data);
-    };
-
-    /**
-     * Returns the instruction for whitespace.
-     *
-     * @param   {String}    data
-     * @param   {Boolean}   [inline]
-     */
-    this.getInstruction_whitespace = function(data, inline) {
-        inline                          = (inline === true);
-        return Util.format('%s[space(%s)]', (inline ? '' : 'space:'), data);
     };
 });
 
