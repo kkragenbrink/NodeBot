@@ -7,7 +7,7 @@
  *     \/  \/ |_|  |_|\__|_| |_(_)_| |_|\___|\__|
  *
  * @created     19th January 2012
- * @edited      12th June 2012
+ * @edited      14th June 2012
  * @package     NodeBot
  *
  * Copyright (C) 2012 Kevin Kragenbrink <kevin@writh.net>
@@ -38,7 +38,7 @@ require('./Lib/Use');
  * Once NodeBot is established, it will load the requested user Plugins.
  *
  * @author      Kevin Kragenbrink <kevin@writh.net>
- * @version     0.4.0
+ * @version     0.5.0
  * @subpackage  Core
  * @singleton
  */
