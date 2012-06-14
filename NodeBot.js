@@ -7,7 +7,7 @@
  *     \/  \/ |_|  |_|\__|_| |_(_)_| |_|\___|\__|
  *
  * @created     19th January 2012
- * @edited      15th May 2012
+ * @edited      12th June 2012
  * @package     NodeBot
  *
  * Copyright (C) 2012 Kevin Kragenbrink <kevin@writh.net>
@@ -38,13 +38,14 @@ require('./Lib/Use');
  * Once NodeBot is established, it will load the requested user Plugins.
  *
  * @author      Kevin Kragenbrink <kevin@writh.net>
- * @version     0.3.0
+ * @version     0.4.0
  * @subpackage  Core
  * @singleton
  */
 
 (function() {
-    process.versions.nodebot            = '0.3.0';
+    process.versions.nodebot            = '0.4.0';
+    process.database                    = false;
 
     var Log                             = use('/Lib/Log');
     Log.log('NodeBot', 'NodeBot %s starting up.', process.versions.nodebot);
@@ -139,6 +140,10 @@ require('./Lib/Use');
             if (plugins.hasOwnProperty(i)) {
                 registerPlugin(i, plugins[i]);
             }
+        }
+
+        if (process.database) {
+            use('/Lib/Database' ).sync();
         }
     }
 

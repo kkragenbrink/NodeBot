@@ -7,7 +7,7 @@
  *     \/  \/ |_|  |_|\__|_| |_(_)_| |_|\___|\__|
  *
  * @created     16th January 2012
- * @edited      16th February 2012
+ * @edited      12th June 2012
  * @package     NodeBot
  *
  * Copyright (C) 2012 Kevin Kragenbrink <kevin@writh.net>
@@ -31,17 +31,30 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+var Arguments                           = use('/Lib/Arguments');
+var Class                               = use('/Lib/Class');
+var Sequelize                           = use('sequelize');
+var Util                                = use('/Lib/Util');
+
 /**
- * A SQLite3 Database Layer
+ * A Database ORM Adapter.
  *
  * @author      Kevin Kragenbrink <kevin@writh.net>
- * @version     0.1.0
+ * @version     0.2.0
  * @subpackage  Lib
  * @singleton
  */
-module.exports = (function() {
-    var Sqlite3                         = use('sqlite3');
-    var Util                            = use('/Lib/Util');
-    var path                            = Util.format('%s/Database/NodeBot.db', process.cwd());
-    return new Sqlite3.Database(path);
-})();
+var path                        = process.cwd();
+var config                      = Arguments.getArgument('config');
+process.database                = true;
+
+module.exports = new Sequelize('NodeBot','NodeBot', '', {
+    dialect                     : 'sqlite',
+    storage                     : Util.format('%s/Database/%s.sqlite', path, config),
+    logging                     : false,
+    define : {
+        timestamps              : false,
+        freezeTableName         : true
+    }
+});
+module.exports.type             = Sequelize;
