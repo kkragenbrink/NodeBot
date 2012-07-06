@@ -40,12 +40,13 @@ var Util                                = use('/Lib/Util');
  * A Database ORM Adapter.
  *
  * @author      Kevin Kragenbrink <kevin@writh.net>
- * @version     0.2.0
+ * @version     0.3.0
  * @subpackage  Lib
  * @singleton
  */
 var path                        = process.cwd();
 var config                      = Arguments.getArgument('config');
+var models                      = {};
 process.database                = true;
 
 module.exports = new Sequelize('NodeBot','NodeBot', '', {
@@ -57,4 +58,10 @@ module.exports = new Sequelize('NodeBot','NodeBot', '', {
         freezeTableName         : true
     }
 });
+module.exports.addModel = function(name, model) {
+    models[name]                = model;
+};
+module.exports.getModel = function(name) {
+    return models[name];
+};
 module.exports.type             = Sequelize;
