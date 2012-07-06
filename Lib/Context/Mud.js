@@ -39,7 +39,7 @@
  * This context handles routes connecting to MUD endpoints.
  *
  * @author      Kevin Kragenbrink <kevin@writh.net>
- * @version     0.6.1
+ * @version     0.6.2
  * @subpackage  Lib/Context
  * @singleton
  * @lends       Mud
@@ -240,7 +240,15 @@ var Mud = use('/Lib/Context').extend(function() {
     };
 
     var send = this.send = function(data) {
-        Socket.write(data.replace(/\n/g, '%r').replace(/\t/g, '%t') + '\n');
+        if (!Util.isArray(data)) {
+            data                        = [data];
+        }
+
+        for (var i = 0; i < data.length; i++) {
+            data[i]                     = data[i].replace(/\n/g, '%r').replace(/\t/g, '%t') + '\n';
+        }
+
+        Socket.write(data.join(''));
     };
 
     /**

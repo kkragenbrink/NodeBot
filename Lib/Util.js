@@ -7,7 +7,7 @@
  *     \/  \/ |_|  |_|\__|_| |_(_)_| |_|\___|\__|
  *
  * @created     21st January 2012
- * @edited      1st April 2012
+ * @edited      6th July 2012
  * @package     NodeBot
  *
  * Copyright (C) 2012 Kevin Kragenbrink <kevin@writh.net>
@@ -35,7 +35,7 @@
  * A class for convenient utilities.
  *
  * @author      Kevin Kragenbrink <kevin@writh.net>
- * @version     0.5.0
+ * @version     0.6.0
  * @subpackage  Lib
  * @singleton
  */
@@ -85,6 +85,23 @@ module.exports = (function() {
         }
 
         return object;
+    };
+
+    /**
+     * Returns the specified time as a SQL DateTime string.
+     * @param   {Date}  date
+     * @return  {String}
+     */
+    Util.getSqlTime = function(date) {
+        return this.sprintf(
+            '%-04d-%-02d-%-02d %-02d:%-02d:%-02d',
+            date.getFullYear(),
+            date.getMonth(),
+            date.getDate(),
+            date.getHours(),
+            date.getMinutes(),
+            date.getSeconds()
+        );
     };
 
     /**
@@ -228,7 +245,7 @@ module.exports = (function() {
                         else if (arg.toString().length < padding && rtl) {
                             arg         = Util.repeat(zerofill ? '0' : ' ', padding - arg.toString().length) + arg.toString();
                         }
-                        else if (arg.length < padding) {
+                        else if (arg.toString().length < padding) {
                             arg         = arg.toString() + Util.repeat(zerofill ? '0' : ' ', padding - arg.toString().length);
                         }
                     }
