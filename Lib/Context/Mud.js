@@ -243,9 +243,15 @@ var Mud = use('/Lib/Context').extend(function() {
         if (!Util.isArray(data)) {
             data                        = [data];
         }
-
+        
         for (var i = 0; i < data.length; i++) {
-            data[i]                     = data[i].replace(/\n/g, '%r').replace(/\t/g, '%t') + '\n';
+            if (typeof data[i] === 'string') {
+                data[i]                 = data[i].replace(/\n/g, '%r').replace(/\t/g, '%t') + '\n';
+            }
+            else {
+                Log.error('Lib/Context/Mud', 'Attempted to send invalid data:', data[i]);
+                data[i]                 = '';
+            }
         }
 
         Socket.write(data.join(''));
