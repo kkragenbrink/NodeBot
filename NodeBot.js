@@ -129,6 +129,7 @@ var NodeBot = Class.create(function() {
         self.config                     = config;
         setupContexts();
         setupPlugins();
+        process.emit('config.loaded');
     };
 
     /**

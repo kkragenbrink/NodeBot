@@ -40,7 +40,7 @@ var Sequelize                           = use('sequelize');
 var Util                                = use('/Lib/Util');
 
 /**
- * A Database ORM Adapter.
+ * A wrapper around the Sequelize ORM.
  *
  * @author      Kevin Kragenbrink <kevin@writh.net>
  * @version     0.4.0
@@ -61,6 +61,10 @@ var Database = EventEmitter.extend(function() {
             sync                : {force : true},
             logging             : function(message) { Log.debug('Lib/Database', message); }
         });
+
+        process.once('config.loaded', function() {
+            database.sync();
+        });
     };
 
     this.addModels = function(path) {
@@ -71,20 +75,9 @@ var Database = EventEmitter.extend(function() {
             Log.log('Lib/Database', 'Discovered model: %s.', models[i]);
             use(path + '/' + models[i]);
         }
-
-        database.sync().on('success', function() {
-            self.emit('sync');
-        });
     };
 
     this.define = function(name, schema, options) {
-        // Add isInstance method.
-        options                 = options || {};
-        options.classMethods    = options.classMethods || {};
-        options.classMethods.isInstance = function(i) {
-            return (i && i.__factory && i.__factory.name && i.__factory.name === name);
-        };
-
         return database.define(name, schema, options);
     };
 
@@ -92,5 +85,4 @@ var Database = EventEmitter.extend(function() {
     var self;
     this.type                   = null;
 });
-module.exports                  = new Database;
-// TODO: Better model definition.
+module.exports                  = (new Database);
