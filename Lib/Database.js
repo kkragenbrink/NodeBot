@@ -32,8 +32,8 @@
  */
 
 var Arguments                           = use('/Lib/Arguments');
-var Class                               = use('/Lib/Class');
-var Config                              = use('/NodeBot' ).config;
+var Config                              = use('/NodeBot' ).config.database;
+var EventEmitter                        = use('/Lib/EventEmitter');
 var FileSystem                          = use('fs');
 var Log                                 = use('/Lib/Log');
 var Sequelize                           = use('sequelize');
@@ -47,24 +47,50 @@ var Util                                = use('/Lib/Util');
  * @subpackage  Lib
  * @singleton
  */
-var Database = new Sequelize(Config.database.name, Config.database.user, Config.database.pass, {
-    port                        : (Config.database.port || 3306),
-    host                        : (Config.database.host || 'localhost'),
-    logging                     : false,//function(message) { Log.debug('Lib/Database', message); },
-    define : {
-        freezeTableName         : true
-    }
+var Database = EventEmitter.extend(function() {
+    this.constructor = function() {
+        self                    = this;
+        this.type               = Sequelize;
+
+        database = new Sequelize(Config.name, Config.user, Config.pass, {
+            port                : (Config.port || 3306),
+            host                : (Config.host || 'localhost'),
+            define : {
+                freezeTableName : true
+            },
+            sync                : {force : true},
+            logging             : function(message) { Log.debug('Lib/Database', message); }
+        });
+    };
+
+    this.addModels = function(path) {
+        var models                  = FileSystem.readdirSync(process.cwd() + '/' + path);
+
+        for (var i = 0; i <  models.length; i++) {
+            models[i]               = models[i].substr(0, models[i].lastIndexOf('.'));
+            Log.log('Lib/Database', 'Discovered model: %s.', models[i]);
+            use(path + '/' + models[i]);
+        }
+
+        database.sync().on('success', function() {
+            self.emit('sync');
+        });
+    };
+
+    this.define = function(name, schema, options) {
+        // Add isInstance method.
+        options                 = options || {};
+        options.classMethods    = options.classMethods || {};
+        options.classMethods.isInstance = function(i) {
+            return (i && i.__factory && i.__factory.name && i.__factory.name === name);
+        };
+
+        return database.define(name, schema, options);
+    };
+
+    var database;
+    var self;
+    this.type                   = null;
 });
-module.exports                  = Database;
-module.exports.addModels = function(path) {
-    var models                  = FileSystem.readdirSync(process.cwd() + '/' + path);
-
-    for (var i = 0; i <  models.length; i++) {
-        models[i]               = models[i].substr(0, models[i].lastIndexOf('.'));
-        Log.log('Lib/Database', 'Discovered model: %s.', models[i]);
-        use(path + '/' + models[i]);
-    }
-
-    Database.sync();
-};
-module.exports.type             = Sequelize;
+module.exports                  = new Database;
+// TODO: Better model definition.
