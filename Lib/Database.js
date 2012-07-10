@@ -7,7 +7,7 @@
  *     \/  \/ |_|  |_|\__|_| |_(_)_| |_|\___|\__|
  *
  * @created     16th January 2012
- * @edited      12th June 2012
+ * @edited      9th July 2012
  * @package     NodeBot
  *
  * Copyright (C) 2012 Kevin Kragenbrink <kevin@writh.net>
@@ -33,6 +33,9 @@
 
 var Arguments                           = use('/Lib/Arguments');
 var Class                               = use('/Lib/Class');
+var Config                              = use('/NodeBot' ).config;
+var FileSystem                          = use('fs');
+var Log                                 = use('/Lib/Log');
 var Sequelize                           = use('sequelize');
 var Util                                = use('/Lib/Util');
 
@@ -40,28 +43,28 @@ var Util                                = use('/Lib/Util');
  * A Database ORM Adapter.
  *
  * @author      Kevin Kragenbrink <kevin@writh.net>
- * @version     0.3.0
+ * @version     0.4.0
  * @subpackage  Lib
  * @singleton
  */
-var path                        = process.cwd();
-var config                      = Arguments.getArgument('config');
-var models                      = {};
-process.database                = true;
-
-module.exports = new Sequelize('NodeBot','NodeBot', '', {
-    dialect                     : 'sqlite',
-    storage                     : Util.format('%s/Database/%s.sqlite', path, config),
-    logging                     : false,
+var Database = new Sequelize(Config.database.name, Config.database.user, Config.database.pass, {
+    port                        : (Config.database.port || 3306),
+    host                        : (Config.database.host || 'localhost'),
+    logging                     : false,//function(message) { Log.debug('Lib/Database', message); },
     define : {
-        timestamps              : false,
         freezeTableName         : true
     }
 });
-module.exports.addModel = function(name, model) {
-    models[name]                = model;
-};
-module.exports.getModel = function(name) {
-    return models[name];
+module.exports                  = Database;
+module.exports.addModels = function(path) {
+    var models                  = FileSystem.readdirSync(process.cwd() + '/' + path);
+
+    for (var i = 0; i <  models.length; i++) {
+        models[i]               = models[i].substr(0, models[i].lastIndexOf('.'));
+        Log.log('Lib/Database', 'Discovered model: %s.', models[i]);
+        use(path + '/' + models[i]);
+    }
+
+    Database.sync();
 };
 module.exports.type             = Sequelize;

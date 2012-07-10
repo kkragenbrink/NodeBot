@@ -30,10 +30,10 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-var version                             = '0.5.0';
+var version                             = '0.5.1';
 var use                                 = require('./Lib/Use');
 
-var Arguments                           = use('/Lib/Arguments');
+var Arguments;
 var Class                               = use('/Lib/Class');
 var Config                              = use('/Lib/Config');
 var Log                                 = use('/Lib/Log');
@@ -45,7 +45,7 @@ var Util                                = use('/Lib/Util');
  * Once NodeBot is established, it will load the requested user Plugins.
  *
  * @author      Kevin Kragenbrink <kevin@writh.net>
- * @version     0.5.0
+ * @version     0.5.1
  * @singleton
  */
 var NodeBot = Class.create(function() {
@@ -55,6 +55,7 @@ var NodeBot = Class.create(function() {
      */
     this.constructor = function() {
         Log.log('NodeBot', 'NodeBot %s starting up.', version);
+        Arguments                       = use('/Lib/Arguments');
 
         self                            = this;
 
