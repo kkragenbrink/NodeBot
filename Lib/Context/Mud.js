@@ -176,7 +176,8 @@ var Mud = use('/Lib/Context').extend(function() {
     function login() {
         switch (Config.client.type.toUpperCase()) {
             case 'MUSH': {
-                send(Util.format('connect "%s" %s', Config.client.username, Config.client.password));
+                var loginData           = Util.format('connect "%s" %s', Config.client.username, Config.client.password);
+                send(loginData);
                 connected               = true;
 
                 // Reset

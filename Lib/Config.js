@@ -7,7 +7,7 @@
  *     \/  \/ |_|  |_|\__|_| |_(_)_| |_|\___|\__|
  *
  * @created     19th January 2012
- * @edited      21st January 2012
+ * @edited      9th July 2012
  * @package     NodeBot
  *
  * Copyright (C) 2012 Kevin Kragenbrink <kevin@writh.net>
@@ -29,107 +29,97 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
- *
- * @changelog 0.2.0
- *   - Used util.inherits() to properly extend EventEmitter, replacing the hack which was there before.
  */
+var ConfigError                         = use('/Lib/ConfigError');
+var EventEmitter                        = use('/Lib/EventEmitter');
+var FileSystem                          = use('fs');
+var Log                                 = use('/Lib/Log');
+var Util                                = use('/Lib/Util');
+var Yaml                                = use('js-yaml');
 
 /**
- * The NodeBot configuration object.
+ * A YAML configuration file.
  *
  * @author      Kevin Kragenbrink <kevin@writh.net>
- * @version     0.2.0
+ * @version     0.3.0
  * @subpackage  Lib
  * @extends     EventEmitter
- * @singleton
  */
-module.exports = (function() {
-    var Cache                           = use('/Lib/Cache');
-    var CacheSubject                    = 'Config';
-    var Config                          = function() {}; // the Configuration object.
-    var Events                          = use('events');
-    var fs                              = use('fs');
-    var jsyaml                          = use('js-yaml');
-    var Log                             = use('/Lib/Log');
-    var Util                            = use('/Lib/Util');
-
-    Util.inherits(Config, Events.EventEmitter);
+var Config = EventEmitter.extend(function() {
 
     /**
-     * ConfigurationError type.
+     * Creates a new Config object.
+     * @param   {String}    filename
      */
-    var ConfigurationError              = function() {};
-        Util.inherits(ConfigurationError, Error);
-        ConfigurationError.code         = null;
-        ConfigurationError.file         = null;
-        ConfigurationError.message      = "%s while attempting to load %s.";
+    this.constructor = function(filename) {
+        file                            = Util.sprintf('Config/%s.yml', filename);
+
+        this.parent.constructor();
+    };
 
     /**
-     * Uses FileSystem to load the requested configuration file.
-     *
-     * @param   file        String      The name of the configuration file to load.
-     * @param   force       Bool        If true, bypass the cache and reload from disk.
-     * @emits   load([Object yaml]
+     * Instructs the Config object to load and prepare the Config file.
      */
-    Config.prototype.load = function(file, force) {
-        var self                        = this;
-        force                           = (force === true);
+    this.load = function() {
+        Log.log('Lib/Config', 'Loading configuration file %s.', file);
 
-        if (Cache.has(CacheSubject)) {
-            // No need to reload it. We've already got it.
-            this.emit('load', Cache.get(CacheSubject))
+        if (!loaded && file !== null) {
+            FileSystem.readFile(file, 'utf-8', loader.bind(this));
+        }
+        else if (loaded) {
+            this.emit('load', this.config);
         }
         else {
-            Log.log('Lib/Config', 'Loading %s configuration.', file);
-            fs.readFile(Util.format('Config/%s.yml', file), 'utf-8', function(error, data) {
-                self.loaded(error, data, file);
-            });
+            var message                 = Util.sprintf(ConfigError.message, 'Invalid configuration file', null);
+            this.emit('error', new ConfigError(message));
         }
     };
 
     /**
-     * Parses the data from a configuration file into a yaml object.
-     *
-     * @param   error       Error       An error from the FileSystem module.
-     * @param   data        String      The contents of the configuration file.
-     * @param   file        String      The file we're attempting to load.
-     * @emits   load([Object yaml])
-     * @emits   error([Error error])
+     * Used by the Load instruction to parse the loaded Config file.
+     * @param   {Error}     error
+     * @param   {Object}    data
      */
-    Config.prototype.loaded = function(error, data, file) {
-        var yaml;                       // The parsed configuration object.
-        var matches;                    // During an error, a regexp match towards the file name.
+    var loader = function(error, data) {
         var message;                    // During an error, the message we intend to send.
 
-        // Handle various error states.
         if (error) {
             switch (error.code) {
                 case 'ENOENT':
-                    message             = Util.format(ConfigurationError.message, 'File not found', file);
+                    message             = Util.sprintf(ConfigError.message, 'File not found', file);
                     break;
                 default:
-                    message             = Util.format(ConfigurationError.message, 'Unknown error', file);
+                    message             = Util.sprintf(ConfigError.message, 'Unknown error', file);
                     break;
             }
         }
-        // No error; try parsing the YAML.
         else {
             try {
-                yaml                    = jsyaml.load(data);
-                Cache.set(CacheSubject, yaml);
+                this.config             = Yaml.load(data);
             }
             catch (error) {
-                message                 = Util.format(ConfigurationError.message, 'Invalid YAML syntax', file);
+                message                 = Util.sprintf(ConfigError.message, 'Invalid YAML syntax', file);
             }
         }
 
         if (message && message.length > 0) {
-            this.emit('error', new ConfigurationError(message));
+            this.emit('error', new ConfigError(message));
         }
         else {
-            this.emit('load', yaml);
+            this.emit('load', this.config);
         }
     };
 
-    return new Config();
-})();
+    /**
+     * The file to be loaded.
+     * @type    {String}
+     */
+    var file;
+
+    /**
+     * Whether the file has been loaded.
+     * @type    {Boolean}
+     */
+    var loaded                          = false;
+});
+module.exports                          = Config;

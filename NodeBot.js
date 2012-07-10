@@ -30,7 +30,14 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-require('./Lib/Use');
+var version                             = '0.5.0';
+var use                                 = require('./Lib/Use');
+
+var Arguments                           = use('/Lib/Arguments');
+var Class                               = use('/Lib/Class');
+var Config                              = use('/Lib/Config');
+var Log                                 = use('/Lib/Log');
+var Util                                = use('/Lib/Util');
 
 /**
  * This class instantiates NodeBot as a Singleton.
@@ -39,119 +46,131 @@ require('./Lib/Use');
  *
  * @author      Kevin Kragenbrink <kevin@writh.net>
  * @version     0.5.0
- * @subpackage  Core
  * @singleton
  */
-
-(function() {
-    process.versions.nodebot            = '0.4.0';
-    process.database                    = false;
-
-    var Log                             = use('/Lib/Log');
-    Log.log('NodeBot', 'NodeBot %s starting up.', process.versions.nodebot);
-    var Arguments                       = use('/Lib/Arguments');
-    var Config                          = use('/Lib/Config');
-    var Util                            = use('/Lib/Util');
-
-    // Handle various process-specific events.
-    process.on('exit', shutdown);
-    process.on('uncaughtException', exception);
-
-    // Handle configuration file loading.
-    Config.on('load', registerContexts);
-    Config.on('load', registerPlugins);
-    Config.on('error', exception);
-    Config.load(getConfigurationName());
+var NodeBot = Class.create(function() {
 
     /**
-     * Handles uncaught exceptions.
-     * @param   err     Error       The exception to handle.
-     * @private
+     * Constructs NodeBot and runs its setup procedures.
      */
-    function exception(err) {
-        if (Log && typeof Log.error === 'function') {
-            Log.trace('NodeBot', err);
-        }
-    }
+    this.constructor = function() {
+        Log.log('NodeBot', 'NodeBot %s starting up.', version);
 
-    function getConfigurationName() {
-        if (Arguments.hasArgument('config')) {
-            return Arguments.getArgument('config');
-        }
-        else {
-            Log.warn('NodeBot', 'No configuration file specified. Please use --config=<filename>');
-            return 'NodeBot';
-        }
-    }
+        self                            = this;
 
+        this.config                     = {};
+        this.contexts                   = {};
+        this.plugins                    = {};
+
+        setupProcess();
+        setupConfiguration();
+    };
+
+    // ***** SETUP ***** //
     /**
-     *
-     * @param {String}  context     The name of the context to register.
-     * @param {Object}  config      The configuration for the context.
+     * Sets up the global Configuration object.
      */
-    function registerContext(context, config) {
-        Log.log('NodeBot', 'Registering %s context.', context);
-        var ctx                         = use(Util.format('/Lib/Context/%s', context));
-        ctx.register(config);
-    }
+    var setupConfiguration = function() {
+        var configFile                  = Arguments.getArgument('config');
+        var config                      = new Config(configFile);
+
+        config.on('error', handleException);
+        config.once('load', handleConfigLoaded);
+
+        config.load();
+    };
 
     /**
      * Registers all contexts noted in the NodeBot configuration object.
-     *
-     * @param {Object}  config      The NodeBot configuration object.
-     * @private
      */
-    function registerContexts(config) {
-        var contexts                    = config.contexts;
+    var setupContexts = function() {
+        for (var i in self.config.contexts) {
+            if (self.config.contexts.hasOwnProperty(i)) {
+                Log.log('NodeBot', 'Registering %s context.', i);
 
-        for (var i in contexts) {
-            if (contexts.hasOwnProperty(i)) {
-                registerContext(i, contexts[i]);
+                self.contexts[i]        = use(Util.sprintf('/Lib/Context/%s', i));
+                self.contexts[i].register(self.config.contexts[i]);
             }
         }
-    }
-
-    /**
-     * Registers a new plugin with NodeBot.
-     * @param   name    String      The plugin to register.
-     * @private
-     */
-    function registerPlugin(name, config) {
-        Log.log('NodeBot', 'Registering %s plugin.', name);
-        var plugin                      = use(Util.format('/Plugin/%s/%s', name, name));
-
-        if (typeof plugin.configure === 'function') {
-            Log.log('NodeBot', 'Configuring %s plugin.', name);
-            plugin.configure(config);
-        }
-    }
+    };
 
     /**
      * Registers all plugins noted in the NodeBot configuration object.
-     *
-     * @param {Object}  config      The NodeBot configuration object.
-     * @private
      */
-    function registerPlugins(config) {
-        Log.log('NodeBot', 'Registering plugins.');
-        var plugins                     = config.plugins;
+    var setupPlugins = function() {
+        for (var i in self.config.plugins) {
+            if (self.config.plugins.hasOwnProperty(i)) {
+                Log.log('NodeBot', 'Registering %s plugin.', i);
 
-        for (var i in plugins) {
-            if (plugins.hasOwnProperty(i)) {
-                registerPlugin(i, plugins[i]);
+                self.plugins[i]         = use(Util.sprintf('/Plugin/%s/%s', i, i));
+
+                if (typeof self.plugins[i].configure === 'function') {
+                    self.plugins[i].configure(self.config.plugins[i]);
+                }
             }
         }
+    };
 
-        if (process.database) {
-            use('/Lib/Database' ).sync();
+    /**
+     * Sets triggers on the global process object.
+     */
+    var setupProcess = function() {
+        process.on('exit', handleShutdown);
+        process.on('uncaughtException', handleException);
+    };
+
+    // ***** Triggers ***** //
+    /**
+     * Stores the configuration object in NodeBot.config and calls configuration-based setup.
+     * @param   {Object}    config
+     */
+    var handleConfigLoaded = function(config) {
+        self.config                     = config;
+        setupContexts();
+        setupPlugins();
+    };
+
+    /**
+     * Handles uncaught exceptions.
+     * @param   {Error}     err         The exception to be handled.
+     * @private
+     */
+    var handleException = function(err) {
+        if (Log && typeof Log.error === 'function') {
+            Log.trace('NodeBot', err);
         }
-    }
+    };
 
     /**
      * Logs the shutdown event before the process completes.
-     * @private
      */
-    function shutdown() {
+    var handleShutdown = function() {
         Log.log('NodeBot', 'NodeBot shutting down.');
-    }
-})();
+    };
+
+    // ***** Attributes ***** //
+    /**
+     * The global NodeBot configuration.
+     * @type    {Config}
+     */
+    this.config                         = null;
+
+    /**
+     * The global Context registry.
+     * @type    {Object}
+     */
+    this.contexts                       = null;
+
+    /**
+     * The global Plugin registry.
+     * @type    {Object}
+     */
+    this.plugins                        = null;
+
+    /**
+     * The NodeBot process, internal to itself.
+     */
+    var self;
+});
+
+module.exports                          = new NodeBot;
