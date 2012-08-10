@@ -7,7 +7,7 @@
  *     \/  \/ |_|  |_|\__|_| |_(_)_| |_|\___|\__|
  *
  * @created     19th January 2012
- * @edited      14th June 2012
+ * @edited      10th August 2012
  * @package     NodeBot
  *
  * Copyright (C) 2012 Kevin Kragenbrink <kevin@writh.net>
@@ -30,7 +30,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-var version                             = '0.5.1';
+var version                             = '1.0.0';
 var use                                 = require('./Lib/Use');
 
 var Arguments;
@@ -45,7 +45,7 @@ var Util                                = use('/Lib/Util');
  * Once NodeBot is established, it will load the requested user Plugins.
  *
  * @author      Kevin Kragenbrink <kevin@writh.net>
- * @version     0.5.1
+ * @version     1.0.0
  * @singleton
  */
 var NodeBot = Class.create(function() {
