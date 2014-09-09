@@ -49,7 +49,7 @@ var Mud = use('/Lib/Context').extend(function() {
     var Dispatcher                      = use('/Lib/Dispatcher');
     var Log                             = use('/Lib/Log');
     var Net                             = use('net');
-    var Socket;                         // The connection to the MUD.
+   var Socket;                         // The connection to the MUD.
     var Util                            = use('/Lib/Util');
 
     var buffer                          = null;
@@ -108,6 +108,7 @@ var Mud = use('/Lib/Context').extend(function() {
 
     function handleEnd(event) {
         connected                       = false;
+        Log.log('Lib/Context/Mud', 'Disconnected from %s', Config.client.name);
         // TODO: Reconnect on timeout here.
     }
 
@@ -189,6 +190,14 @@ var Mud = use('/Lib/Context').extend(function() {
                 send('&COMMAND me=$^' + Config.input.prefix + '([^\\s]+)\\s?(.*)?:think ifelse(gt(conn(%!),-1),u(TOJSON,type:command,requester:%#,path:%1,data:%2),pemit(%#,NodeBot is offline.))');
                 send('@set me/COMMAND=REGEX');
                 send('@lock/page me==me');
+
+                setTimeout(function() {
+                    send('QUIT');
+                    
+                    setTimeout(function() {
+                        connect();
+                    }, 1000);
+                }, 86400000);
 
                 break;
             }
