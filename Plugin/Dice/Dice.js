@@ -66,7 +66,16 @@ var Dice = Class.create(function() {
         parsers                         = FileSystem.readdirSync(process.cwd() + '/Plugin/Dice/Parsers');
         for (var i = 0; i < parsers.length; i++) {
             parsers[i]                  = parsers[i].substr(0, parsers[i].lastIndexOf('.'));
-        }
+
+            var pRoll = new Route();
+                pRoll.command = parsers[i];
+                pRoll.path = new RegExp(Util.format('(%s)([/:A-z0-9-])*', parsers[i]), 'i');
+                pRoll.contexts = {
+                    Mud : /(.*)/i
+                };
+                pRoll.handler = roll;
+            Dispatcher.addRoute(pRoll);
+        };
 
         Log.log('Plugin/Dice', 'Registered parsers:', parsers.join(', '), '; Default:', DEFAULT_PARSER);
     };
@@ -125,10 +134,13 @@ var Dice = Class.create(function() {
 
         // Determine the switches.
         var switches                    = path.split('/');
-        switches.shift();
+        var parser = switches.shift();
 
         // Determine the parser.
-        if (switches.length > 0 && Util.inArray(switches[0], parsers)) {
+        if (Util.inArray(parser, parsers)) {
+            parserType = parser;
+        }
+        else if (switches.length > 0 && Util.inArray(switches[0], parsers)) {
             parserType                  = switches.shift();
         }
         else {
