@@ -138,6 +138,14 @@ var wod = Parser.extend(function() {
         }
     };
 
+    var getFromRandom = function (dice) {
+        var results = [];
+        for (var i = 0; i < dice; i++) {
+            results.push(1 + Math.floor(Math.random() * 10));
+        }
+        return results;
+    };
+
     this.parseNextToken = function () {
         var token = tokenizer.getNextToken();
 
@@ -146,8 +154,8 @@ var wod = Parser.extend(function() {
         }
         else {
             var dice = stack.reduce(function (a, b) { return a + b; }, 0);
-            var url = Util.format(TRNG_URL, dice);
-            http.get(url, handleFromRandom.bind(this, rolls, respond));
+            var results = getFromRandom(dice);
+            parseFromRandom.call(this, results, rolls, respond);
         }
     };
 
@@ -270,8 +278,8 @@ var wod = Parser.extend(function() {
         });
 
         if (re) {
-            var url = Util.format(TRNG_URL, re);
-            http.get(url, handleFromRandom.bind(this, rerolls, callback));
+            var re2 = getFromRandom(re);
+            parseFromRandom.call(this, re2, rerolls, callback);
         }
         else {
             callback();
