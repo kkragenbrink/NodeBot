@@ -62,6 +62,7 @@ var sr = Parser.extend(function() {
         rolls = [];
         stack = [];
         hits = 0;
+        glitches = 0;
         stream = [];
         tokenizer = new Tokenizer(types);
     };
@@ -151,8 +152,17 @@ var sr = Parser.extend(function() {
     };
 
     var respond = function () {
+        var glitch = '';
         for (var method in results) {
-            results[method] = Util.format(results[method], roll, formatConfig(), hits, formatVerbose());
+            if (glitches >= (rolls.length/2)) {
+                glitch = ' %ch%crGlitch%cn.';
+
+                if (!hits) {
+                    glitch = ' %ch%crCritical Glitch%cn.';
+                }
+            }
+
+            results[method] = Util.format(results[method], roll, formatConfig(), hits, glitch, formatVerbose());
         }
 
         if (config.silent) {
@@ -240,12 +250,13 @@ var sr = Parser.extend(function() {
             if (roll >= config.target) {
                 hits++;
             }
+
+            if (roll <= config.glitch) {
+                glitches++;
+            }
         });
         callback();
     };
-
-
-
 
     var callback                        = function () {};
 
@@ -265,9 +276,15 @@ var sr = Parser.extend(function() {
      * @var     {Object}
      */
     var messages = {
-        emit : '%s You roll %s%s: %ch%d%cn hits.%s',
-        oemit : '%s %s rolls %s%s: %ch%d%cn hits.%s'
+        emit : '%s You roll %s%s: %ch%d%cn hits%s.%s',
+        oemit : '%s %s rolls %s%s: %ch%d%cn hits%s.%s'
     };
+
+    /**
+     * Number of glitches
+     * @var     {Integer}
+     */
+    var glitches;
 
     /**
      * Final results.
