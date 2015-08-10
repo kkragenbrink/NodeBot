@@ -238,7 +238,7 @@ var sr = Parser.extend(function() {
             output.push(roll);
 
             if (roll >= config.target) {
-                successes++;
+                hits++;
             }
         });
         callback();
