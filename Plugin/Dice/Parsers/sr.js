@@ -276,8 +276,8 @@ var sr = Parser.extend(function() {
      * @var     {Object}
      */
     var messages = {
-        emit : '%s You roll %s%s: %ch%d%cn hits%s.%s',
-        oemit : '%s %s rolls %s%s: %ch%d%cn hits%s.%s'
+        emit : '%s You roll %s%s: %ch%d%cn hits.%s%s',
+        oemit : '%s %s rolls %s%s: %ch%d%cn hits.%s%s'
     };
 
     /**
