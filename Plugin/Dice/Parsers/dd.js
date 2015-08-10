@@ -258,8 +258,15 @@ var dd = Parser.extend(function() {
     };
     
     var getFromRandom = function (dice, sides, results, callback) {
-        var url                         = Util.format('http://www.random.org/integers/?num=%s&min=1&max=%s&col=1&base=10&format=plain&rnd=new', dice, sides);
-        http.get(url, rollFromRandom.bind(this, dice, results, callback));
+        //var url                         = Util.format('http://www.random.org/integers/?num=%s&min=1&max=%s&col=1&base=10&format=plain&rnd=new', dice, sides);
+        //http.get(url, rollFromRandom.bind(this, dice, results, callback));
+
+        var results = [];
+        for (var i = 0; i < dice; i++) {
+            results.push(1 + Math.floor(Math.random() * sides));
+        }
+
+        allFromRandom(dice, callback, results);
     };
     
     var allFromRandom = function (dice, callback, results) {
@@ -285,10 +292,10 @@ var dd = Parser.extend(function() {
                 results.reverse();
                 for (i = 0; i < results.length; i++) {
                     if (i < parseInt(config.highest)) {
-                        highest.push(lowest[i]);
+                        highest.push(results[i]);
                     }
                     else  {
-                        discarded.push(lowest[i]);
+                        discarded.push(results[i]);
                     }
                 }
                 results                     = highest;
